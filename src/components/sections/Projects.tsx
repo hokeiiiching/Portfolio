@@ -17,7 +17,7 @@ const projects = [
     title: "Full-Stack Quantitative Trading Bot",
     description: "Built a trading bot using Markov Chains to analyze historical price trends and predict short-term market movements.",
     tags: ["Python", "Markov Chains", "Full-Stack", "Finance"],
-    href: "https://markov-bot-s7o7.vercel.app/", // <-- The link for the card
+    href: "https://markovbot.vercel.app/", // <-- The link for the card
   },
 ];
 
