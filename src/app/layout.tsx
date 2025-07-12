@@ -1,19 +1,25 @@
 // src/app/layout.tsx
-
 import type { Metadata } from "next";
-// A great monospaced font for the cyberpunk aesthetic
-import { Fira_Code } from "next/font/google";
+import { Fira_Code, Orbitron } from "next/font/google";
 import "./globals.css";
 
-// Configure the font
+// Configurations
 const firaCode = Fira_Code({
   subsets: ["latin"],
   display: 'swap',
+  variable: '--font-fira-code', 
+});
+
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-orbitron', 
 });
 
 export const metadata: Metadata = {
   title: "Ho Kei Ching | Software Engineer Portfolio",
-  description: "Portfolio of Ho Kei Ching, AI/ML enthusiast and Software Engineer with a focus on modern web applications.",
+  description: "Portfolio of Ho Kei Ching, a Software Engineer and Business Development Intern.",
 };
 
 export default function RootLayout({
@@ -22,9 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Add className="dark" to the <html> tag to enable dark mode by default
     <html lang="en" className="dark">
-      <body className={firaCode.className}>{children}</body>
+      <body className={`${firaCode.variable} ${orbitron.variable} font-sans`}>{children}</body>
     </html>
   );
 }

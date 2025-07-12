@@ -28,7 +28,7 @@ export const Projects = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {projects.map((project) => {
           const CardComponent = (
-            <Card className="flex flex-col h-full transition-all group hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50">
+            <Card className="flex flex-col h-full transition-all group hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50 cyber-card">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle>{project.title}</CardTitle>

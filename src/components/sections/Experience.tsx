@@ -18,7 +18,7 @@ export const Experience = () => {
   return (
     <section className="flex flex-col gap-4">
       <h3 className="text-2xl font-semibold tracking-tight">Work Experience</h3>
-      <Card>
+      <Card className="cyber-card">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
