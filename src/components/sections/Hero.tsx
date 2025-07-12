@@ -1,5 +1,5 @@
 // src/components/sections/Hero.tsx
-import { Mail, Linkedin, Github, MapPin, School, Rocket, Music } from "lucide-react";
+import { Mail, Linkedin, Github, MapPin, School, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Hero = () => {

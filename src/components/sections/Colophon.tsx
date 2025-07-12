@@ -39,7 +39,7 @@ export const Colophon = () => {
   return (
     <section className="flex flex-col gap-8">
       <p className="max-w-3xl text-muted-foreground leading-relaxed">
-        This portfolio is built from scratch as a personal project to dive deeper into the React ecosystem. It's designed in Figma and developed with a modern, performant tech stack.
+        This portfolio is built from scratch as a personal project to dive deeper into the React ecosystem. It is designed in Figma and developed with a modern, performant tech stack.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {techStack.map((tech) => (
