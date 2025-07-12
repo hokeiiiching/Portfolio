@@ -1,7 +1,7 @@
 // src/components/sections/Contact.tsx
 
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Mail, Linkedin } from "lucide-react"; 
+import { ArrowUp } from "lucide-react"; 
 
 export const Contact = () => {
   return (
@@ -9,7 +9,7 @@ export const Contact = () => {
       <div className="flex flex-col gap-2">
         <h3 className="text-2xl font-semibold tracking-tight">Get In Touch</h3>
         <p className="text-muted-foreground max-w-lg">
-          I'm currently seeking opportunities for Summer 2026 and am always open to connecting. Feel free to send me a message.
+          I am always open to connecting and discussing about business opportunities. Feel free to send me a message or connect!
         </p>
       </div>
       

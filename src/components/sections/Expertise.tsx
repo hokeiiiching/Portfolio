@@ -19,7 +19,7 @@ const expertiseAreas = [
     icon: <Code className="w-8 h-8 text-primary" />,
     title: "Software Engineering",
     underlineColor: "bg-lime-400",
-    description: "Proficient in multiple languages including Python and C++, with a strong foundation in algorithms and system design.",
+    description: "With the rise in GenAI, I focus on LLM selection and prompt engineering to create efficient AI-driven applications. Also, I place a heavy emphasis on clean code architecture and design patterns - something that AI still struggles with today!",
   },
 ];
 
