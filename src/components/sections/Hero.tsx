@@ -33,10 +33,6 @@ export const Hero = () => {
           <School className="h-5 w-5 text-primary" />
           <span>Year 1, NUS Computer Science & Business</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Music className="h-5 w-5 text-primary" />
-          <span>Lover of old pop/rock music</span>
-        </div>
       </div>
 
       <div className="flex items-center gap-2 pt-2">
