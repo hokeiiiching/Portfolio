@@ -19,6 +19,12 @@ const projects = [
     tags: ["Python", "Markov Chains", "Full-Stack", "Finance"],
     href: "https://markovbot.vercel.app/", // <-- The link for the card
   },
+  {
+    title: "Cognite: AI-Powered Learning Platform",
+    description: "A WIP AI-native learning platform designed to combat the 'AI crutch'. It transforms study materials into an interactive experience using cognitive science principles like spaced repetition and active retrieval to foster deep understanding.",
+    tags: ["Next.js", "TypeScript", "Python", "LangChain", "Full-Stack", "WIP"],
+    href: "https://github.com/hokeiiiching/cognite", 
+  }
 ];
 
 export const Projects = () => {
