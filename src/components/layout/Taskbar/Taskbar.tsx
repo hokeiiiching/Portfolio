@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useSound } from '../../../hooks/useSound';
 import {
-    User, FolderOpen, FileCode, Terminal, Mail,
+    User, FolderOpen, FileCode, Terminal, Mail, Settings,
     Wifi, Volume2, Battery, Cpu,
     Activity, Github, Linkedin, Globe
 } from 'lucide-react';
@@ -23,9 +24,10 @@ interface TaskbarProps {
 const PINNED_APPS = [
     { id: 'about', icon: <User size={20} />, label: 'About Me', color: 'cyan' },
     { id: 'projects', icon: <FolderOpen size={20} />, label: 'Projects', color: 'magenta' },
-    { id: 'resume', icon: <FileCode size={20} />, label: 'Resume', color: 'green' },
-    { id: 'terminal', icon: <Terminal size={20} />, label: 'Terminal', color: 'yellow' },
+    { id: 'resume', icon: <FileCode size={20} />, label: 'Resume', color: 'cyan' },
+    { id: 'terminal', icon: <Terminal size={20} />, label: 'Terminal', color: 'green' },
     { id: 'contact', icon: <Mail size={20} />, label: 'Contact', color: 'pink' },
+    { id: 'settings', icon: <Settings size={20} />, label: 'Settings', color: 'yellow' },
 ];
 
 const QUICK_LINKS = [
@@ -43,6 +45,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
     const [time, setTime] = useState(new Date());
     const [cpuUsage] = useState(Math.floor(Math.random() * 30) + 10);
     const [ramUsage] = useState(Math.floor(Math.random() * 40) + 30);
+    const { playSound } = useSound();
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
@@ -80,7 +83,11 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                     return (
                         <button
                             key={app.id}
-                            onClick={() => isOpen ? onWindowClick(app.id) : onAppClick(app.id)}
+                            onClick={() => {
+                                playSound('click');
+                                isOpen ? onWindowClick(app.id) : onAppClick(app.id);
+                            }}
+                            onMouseEnter={() => playSound('hover')}
                             className={`
                 relative h-10 w-10 flex items-center justify-center rounded
                 transition-all duration-200 group
@@ -118,7 +125,11 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                 {openWindows.filter(w => !PINNED_APPS.some(p => p.id === w.id)).map(win => (
                     <button
                         key={win.id}
-                        onClick={() => onWindowClick(win.id)}
+                        onClick={() => {
+                            playSound('click');
+                            onWindowClick(win.id);
+                        }}
+                        onMouseEnter={() => playSound('hover')}
                         className={`
               h-10 px-3 flex items-center gap-2 rounded transition-all
               hover:bg-neon-cyan/10 text-neon-cyan
@@ -141,6 +152,8 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                             href={link.url}
                             target="_blank"
                             rel="noreferrer"
+                            onMouseEnter={() => playSound('hover')}
+                            onClick={() => playSound('click')}
                             className="h-8 w-8 flex items-center justify-center rounded 
                         text-neon-cyan/60 hover:text-neon-cyan hover:bg-neon-cyan/10 transition-all"
                             title={link.label}
@@ -164,9 +177,9 @@ export const Taskbar: React.FC<TaskbarProps> = ({
 
                 {/* System Icons */}
                 <div className="flex items-center gap-2 text-neon-cyan/60">
-                    <Wifi size={14} className="hover:text-neon-cyan transition-colors cursor-pointer" />
-                    <Volume2 size={14} className="hover:text-neon-cyan transition-colors cursor-pointer" />
-                    <Battery size={14} className="hover:text-neon-cyan transition-colors cursor-pointer" />
+                    <Wifi size={14} className="hover:text-neon-cyan transition-colors cursor-pointer" onMouseEnter={() => playSound('hover')} />
+                    <Volume2 size={14} className="hover:text-neon-cyan transition-colors cursor-pointer" onMouseEnter={() => playSound('hover')} />
+                    <Battery size={14} className="hover:text-neon-cyan transition-colors cursor-pointer" onMouseEnter={() => playSound('hover')} />
                 </div>
 
                 {/* Clock */}

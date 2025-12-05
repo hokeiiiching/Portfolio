@@ -39,17 +39,84 @@ export const Window: React.FC<WindowProps> = ({
     const windowRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const [localPos, setLocalPos] = useState(position);
+    const [tilt, setTilt] = useState({ x: 0, y: 0 });
+    const [isGlitching, setIsGlitching] = useState(true);
+    const localPosRef = useRef(position);
+
+    // Trigger glitch on mount
+    useEffect(() => {
+        const timer = setTimeout(() => setIsGlitching(false), 300);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Update ref whenever localPos changes
+    useEffect(() => {
+        localPosRef.current = localPos;
+    }, [localPos]);
+
+    // Sync local position with prop position only when prop changes
+    useEffect(() => {
+        setLocalPos(position);
+    }, [position]);
+
+    const handleTilt = (e: React.MouseEvent) => {
+        if (isMaximized || isDragging) {
+            setTilt({ x: 0, y: 0 });
+            return;
+        }
+
+        const rect = windowRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -2; // Max 2deg rotation
+        const rotateY = ((x - centerX) / centerX) * 2;
+
+        setTilt({ x: rotateX, y: rotateY });
+    };
+
+    const resetTilt = () => setTilt({ x: 0, y: 0 });
 
     useEffect(() => {
         if (!isDragging) return;
 
+        // Prevent text selection globally while dragging
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'move';
+
         const handleMouseMove = (e: MouseEvent) => {
-            const newX = Math.max(0, e.clientX - dragOffset.x);
-            const newY = Math.max(0, e.clientY - dragOffset.y);
-            onPositionChange(id, { x: newX, y: newY });
+            let newX = e.clientX - dragOffset.x;
+            let newY = e.clientY - dragOffset.y;
+
+            // Snapping Logic
+            const SNAP_THRESHOLD = 25;
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
+
+            // Snap to Left
+            if (Math.abs(newX) < SNAP_THRESHOLD) newX = 0;
+            // Snap to Top
+            if (Math.abs(newY) < SNAP_THRESHOLD) newY = 0;
+            // Snap to Right
+            if (Math.abs(newX + size.width - screenW) < SNAP_THRESHOLD) newX = screenW - size.width;
+            // Snap to Bottom
+            if (Math.abs(newY + size.height - (screenH - 56)) < SNAP_THRESHOLD) newY = screenH - 56 - size.height;
+
+            setLocalPos({ x: newX, y: newY });
         };
 
-        const handleMouseUp = () => setIsDragging(false);
+        const handleMouseUp = () => {
+            setIsDragging(false);
+            onPositionChange(id, localPosRef.current);
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+        };
 
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
@@ -57,8 +124,10 @@ export const Window: React.FC<WindowProps> = ({
         return () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
         };
-    }, [isDragging, dragOffset, id, onPositionChange]);
+    }, [isDragging, dragOffset, id, onPositionChange, size]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (isMaximized) return;
@@ -82,15 +151,21 @@ export const Window: React.FC<WindowProps> = ({
                     : 'shadow-lg border-cyber-border/50'
                 }
         bg-cyber-dark/95 backdrop-blur-md border rounded-lg
+        ${isGlitching ? 'window-glitch' : ''}
       `}
             style={{
                 zIndex,
-                left: isMaximized ? 0 : position.x,
-                top: isMaximized ? 0 : position.y,
+                left: isMaximized ? 0 : localPos.x,
+                top: isMaximized ? 0 : localPos.y,
                 width: isMaximized ? '100%' : size.width,
                 height: isMaximized ? 'calc(100% - 56px)' : size.height,
+                // Remove transition during drag for instant response
+                transition: isDragging ? 'none' : 'all 0.2s ease-out',
+                transform: isMaximized ? 'none' : `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`
             }}
             onMouseDown={() => onFocus(id)}
+            onMouseMove={handleTilt}
+            onMouseLeave={resetTilt}
         >
             {/* Title Bar */}
             <div
