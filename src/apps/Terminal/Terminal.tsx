@@ -1,345 +1,342 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+// import { Terminal as TerminalIcon } from 'lucide-react'; // Unused
 
-// --- Types ---
-type FileSystemItem = {
-    type: 'file' | 'directory';
-    content?: string;
-    children?: Record<string, FileSystemItem>;
-};
+interface Command {
+    command: string;
+    output: React.ReactNode;
+    path: string;
+}
 
-type FileSystem = Record<string, FileSystemItem>;
+interface FileSystem {
+    [key: string]: {
+        type: 'file' | 'dir';
+        content?: string;
+        children?: FileSystem;
+    };
+}
 
-// --- Initial State ---
 const INITIAL_FS: FileSystem = {
     'home': {
-        type: 'directory',
+        type: 'dir',
         children: {
-            'hokei': {
-                type: 'directory',
+            'user': {
+                type: 'dir',
                 children: {
                     'projects': {
-                        type: 'directory',
+                        type: 'dir',
                         children: {
-                            'minecode.txt': { type: 'file', content: 'MineCode: Distributed AI agent for Minecraft...' },
-                            'regtok.txt': { type: 'file', content: 'RegTok: AI-powered legal compliance system...' },
+                            'portfolio.txt': { type: 'file', content: 'My awesome cyberpunk portfolio built with React.' },
+                            'ai-chat.js': { type: 'file', content: 'console.log("Hello AI");' }
                         }
                     },
-                    'skills': {
-                        type: 'directory',
+                    'documents': {
+                        type: 'dir',
                         children: {
-                            'frontend.txt': { type: 'file', content: 'React, TypeScript, TailwindCSS, Svelte' },
-                            'backend.txt': { type: 'file', content: 'Node.js, Python, PostgreSQL, Docker' },
+                            'resume.md': { type: 'file', content: '# Hokei\n\nFull Stack Developer...' },
+                            'secrets.txt': { type: 'file', content: 'Konami Code: Up Up Down Down Left Right Left Right B A' }
                         }
                     },
-                    'about.txt': { type: 'file', content: 'Ho Kei Ching\nSoftware Engineer & Developer\nNUS Computer Science & Business Admin' },
-                    'contact.txt': { type: 'file', content: 'Email: hokeiching.work@gmail.com\nLinkedIn: linkedin.com/in/ho-kei-ching' },
-                    'secret.txt': { type: 'file', content: '🔐 You found the secret! There is no spoon.' },
+                    'welcome.txt': { type: 'file', content: 'Welcome to HOKEI_OS v2.0! Type "help" to get started.' }
                 }
             }
         }
     }
 };
 
-// --- Helper Functions ---
-const resolvePath = (fs: FileSystem, currentPath: string[], targetPath: string): { item: FileSystemItem | null, parent: FileSystemItem | null, name: string } => {
-    const parts = targetPath.split('/').filter(p => p);
-    let pathStack = targetPath.startsWith('/') ? [] : [...currentPath];
-
-    // Handle '..' and '.'
-    const finalParts: string[] = [];
-    for (const part of [...pathStack, ...parts]) {
-        if (part === '..') {
-            finalParts.pop();
-        } else if (part !== '.') {
-            finalParts.push(part);
-        }
-    }
-
-    let current: FileSystemItem = { type: 'directory', children: fs };
-    let parent: FileSystemItem | null = null;
-    let name = '';
-
-    for (let i = 0; i < finalParts.length; i++) {
-        const part = finalParts[i];
-        if (current.type !== 'directory' || !current.children || !current.children[part]) {
-            return { item: null, parent: null, name: part };
-        }
-        parent = current;
-        current = current.children[part];
-        name = part;
-    }
-
-    return { item: current, parent, name };
-};
-
-const formatPath = (path: string[]) => {
-    if (path.length === 0) return '/';
-    const pathStr = '/' + path.join('/');
-    if (pathStr.startsWith('/home/hokei')) {
-        return '~' + pathStr.slice(11);
-    }
-    return pathStr;
-};
+const NEOFETCH_ART = `
+       .---.
+      /     \\
+      \\.    /
+       '-..-'
+`;
 
 export const TerminalApp: React.FC = () => {
-    const [history, setHistory] = useState<Array<{ input: string; output: string }>>([
-        { input: '', output: 'HOKEI_OS Terminal v2.1.0\nType "help" for available commands.\n' }
-    ]);
+    const [history, setHistory] = useState<Command[]>([]);
     const [input, setInput] = useState('');
-    const [commandHistory, setCommandHistory] = useState<string[]>([]);
-    const [historyIndex, setHistoryIndex] = useState(-1);
-
-    // Filesystem State
+    const [currentPath, setCurrentPath] = useState<string[]>(['home', 'user']);
     const [fs, setFs] = useState<FileSystem>(INITIAL_FS);
-    const [currentPath, setCurrentPath] = useState<string[]>(['home', 'hokei']);
-
+    const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
+    // Auto-scroll to bottom
     useEffect(() => {
-        containerRef.current?.scrollTo(0, containerRef.current.scrollHeight);
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [history]);
 
-    const executeCommand = (cmd: string, args: string[]): string => {
-        switch (cmd) {
-            case 'help':
-                return `
-Available Commands:
-  ls [dir]      List directory contents
-  cd [dir]      Change directory
-  pwd           Print working directory
-  mkdir [dir]   Create directory
-  touch [file]  Create empty file
-  cat [file]    Read file content
-  rm [file]     Remove file or directory
-  clear         Clear terminal
-  echo [text]   Print text
-  whoami        Display user
-  date          Display date
-  help          Show this help`;
+    // Focus input on click
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, []);
 
-            case 'ls': {
-                const target = args[0] || '.';
-                const { item } = resolvePath(fs, currentPath, target);
-
-                if (!item) return `ls: cannot access '${target}': No such file or directory`;
-                if (item.type === 'file') return target;
-
-                if (item.children) {
-                    return Object.entries(item.children).map(([name, child]) => {
-                        const isDir = child.type === 'directory';
-                        return isDir ? `\x1b[1;34m${name}/\x1b[0m` : name;
-                    }).join('  ');
-                }
-                return '';
-            }
-
-            case 'cd': {
-                const target = args[0] || '~';
-                const targetPath = target === '~' ? '/home/hokei' : target;
-                const { item } = resolvePath(fs, currentPath, targetPath);
-
-                if (!item) return `cd: ${target}: No such file or directory`;
-                if (item.type !== 'directory') return `cd: ${target}: Not a directory`;
-
-                // Re-calculate absolute path for state
-                // This is a simplified approach; a robust one would track the absolute path stack
-                // For now, let's just resolve the path string to an array
-                // A better way is to actually traverse and build the new path array
-                // But since resolvePath logic is stateless regarding the path array, we need to replicate it
-
-                const parts = targetPath.split('/').filter(p => p);
-                let newPath = targetPath.startsWith('/') ? [] : [...currentPath];
-                for (const part of parts) {
-                    if (part === '..') newPath.pop();
-                    else if (part !== '.') newPath.push(part);
-                }
-                setCurrentPath(newPath);
-                return '';
-            }
-
-            case 'pwd':
-                return '/' + currentPath.join('/');
-
-            case 'mkdir': {
-                if (!args[0]) return 'mkdir: missing operand';
-                const name = args[0];
-                const { item: parent } = resolvePath(fs, currentPath, '.');
-
-                if (parent && parent.children) {
-                    if (parent.children[name]) return `mkdir: cannot create directory '${name}': File exists`;
-
-                    // Immutable update
-                    const newFs = JSON.parse(JSON.stringify(fs));
-                    let current = newFs;
-                    for (const part of currentPath) {
-                        current = current[part].children;
-                    }
-                    current[name] = { type: 'directory', children: {} };
-                    setFs(newFs);
-                    return '';
-                }
-                return 'mkdir: error creating directory';
-            }
-
-            case 'touch': {
-                if (!args[0]) return 'touch: missing operand';
-                const name = args[0];
-                const { item: parent } = resolvePath(fs, currentPath, '.');
-
-                if (parent && parent.children) {
-                    if (parent.children[name]) return ''; // Update timestamp in real OS, do nothing here
-
-                    const newFs = JSON.parse(JSON.stringify(fs));
-                    let current = newFs;
-                    for (const part of currentPath) {
-                        current = current[part].children;
-                    }
-                    current[name] = { type: 'file', content: '' };
-                    setFs(newFs);
-                    return '';
-                }
-                return 'touch: error creating file';
-            }
-
-            case 'rm': {
-                if (!args[0]) return 'rm: missing operand';
-                const name = args[0];
-                const { item: parent } = resolvePath(fs, currentPath, '.');
-
-                if (parent && parent.children) {
-                    if (!parent.children[name]) return `rm: cannot remove '${name}': No such file or directory`;
-
-                    const newFs = JSON.parse(JSON.stringify(fs));
-                    let current = newFs;
-                    for (const part of currentPath) {
-                        current = current[part].children;
-                    }
-                    delete current[name];
-                    setFs(newFs);
-                    return '';
-                }
-                return 'rm: error removing file';
-            }
-
-            case 'cat': {
-                if (!args[0]) return 'cat: missing operand';
-                const { item } = resolvePath(fs, currentPath, args[0]);
-
-                if (!item) return `cat: ${args[0]}: No such file or directory`;
-                if (item.type === 'directory') return `cat: ${args[0]}: Is a directory`;
-                return item.content || '';
-            }
-
-            case 'whoami': return 'hokei';
-            case 'date': return new Date().toLocaleString();
-            case 'echo': return args.join(' ');
-
-            default:
-                return `Command not found: ${cmd}`;
+    // Run neofetch on startup
+    useEffect(() => {
+        if (history.length === 0) {
+            handleCommand('neofetch');
         }
+    }, []);
+
+    const resolvePath = (pathStr: string): { target: any, newPath: string[] } | null => {
+        const parts = pathStr.split('/').filter(p => p);
+        // let current = fs; // Unused
+        let traversalPath = [...currentPath];
+
+        if (pathStr.startsWith('/')) {
+            traversalPath = [];
+        }
+
+        // Navigate to start
+        let node: any = fs;
+        for (const p of traversalPath) {
+            node = node[p]?.children;
+        }
+
+        // Traverse
+        for (const part of parts) {
+            if (part === '.') continue;
+            if (part === '..') {
+                if (traversalPath.length > 0) traversalPath.pop();
+                // Reset node to root and traverse again (inefficient but simple for this depth)
+                node = fs;
+                for (const p of traversalPath) {
+                    node = node[p]?.children;
+                }
+            } else {
+                if (node && node[part] && node[part].type === 'dir') {
+                    node = node[part].children;
+                    traversalPath.push(part);
+                } else {
+                    return null;
+                }
+            }
+        }
+        return { target: node, newPath: traversalPath };
+    };
+
+    const getFileContent = (fileName: string) => {
+        let node: any = fs;
+        for (const p of currentPath) {
+            node = node[p]?.children;
+        }
+        return node[fileName]?.type === 'file' ? node[fileName].content : null;
     };
 
     const handleCommand = (cmd: string) => {
-        const trimmed = cmd.trim();
-        if (!trimmed) return;
+        const [command, ...args] = cmd.trim().split(' ');
+        let output: React.ReactNode = '';
 
-        const [command, ...args] = trimmed.split(' ');
-
-        // Add to history
-        setCommandHistory(prev => [...prev.filter(c => c !== trimmed), trimmed]);
-        setHistoryIndex(-1);
-
-        if (command.toLowerCase() === 'clear') {
-            setHistory([]);
-            return;
+        switch (command.toLowerCase()) {
+            case 'help':
+                output = (
+                    <div className="space-y-1 text-neon-cyan/80">
+                        <div>Available commands:</div>
+                        <div className="grid grid-cols-[100px_1fr] gap-2">
+                            <span className="text-neon-cyan">neofetch</span><span>Display system information</span>
+                            <span className="text-neon-cyan">ls</span><span>List directory contents</span>
+                            <span className="text-neon-cyan">cd</span><span>Change directory</span>
+                            <span className="text-neon-cyan">pwd</span><span>Print working directory</span>
+                            <span className="text-neon-cyan">cat</span><span>Read file content</span>
+                            <span className="text-neon-cyan">mkdir</span><span>Create directory</span>
+                            <span className="text-neon-cyan">touch</span><span>Create file</span>
+                            <span className="text-neon-cyan">rm</span><span>Remove file or directory</span>
+                            <span className="text-neon-cyan">clear</span><span>Clear terminal history</span>
+                            <span className="text-neon-cyan">whoami</span><span>Display current user</span>
+                            <span className="text-neon-cyan">date</span><span>Display current date/time</span>
+                        </div>
+                    </div>
+                );
+                break;
+            case 'neofetch':
+                output = (
+                    <div className="flex gap-6 text-sm font-mono my-2">
+                        <div className="text-neon-cyan font-bold whitespace-pre leading-tight select-none">
+                            {NEOFETCH_ART}
+                        </div>
+                        <div className="space-y-1">
+                            <div className="font-bold text-neon-cyan mb-2">user@hokei_os</div>
+                            <div className="grid grid-cols-[100px_1fr] gap-x-2">
+                                <span className="text-neon-cyan font-bold">OS</span><span>HOKEI_OS v2.0 (Cyberpunk)</span>
+                                <span className="text-neon-cyan font-bold">Host</span><span>React Portfolio Engine</span>
+                                <span className="text-neon-cyan font-bold">Kernel</span><span>Web Browser 128.0</span>
+                                <span className="text-neon-cyan font-bold">Uptime</span><span>{Math.floor(performance.now() / 60000)} mins</span>
+                                <span className="text-neon-cyan font-bold">Packages</span><span>25 (npm)</span>
+                                <span className="text-neon-cyan font-bold">Shell</span><span>zsh 5.9</span>
+                                <span className="text-neon-cyan font-bold">Resolution</span><span>{window.innerWidth}x{window.innerHeight}</span>
+                                <span className="text-neon-cyan font-bold">Theme</span><span>Neon Night [GTK2/3]</span>
+                                <span className="text-neon-cyan font-bold">Icons</span><span>Lucide React</span>
+                                <span className="text-neon-cyan font-bold">Terminal</span><span>HokeiTerm</span>
+                                <span className="text-neon-cyan font-bold">CPU</span><span>Virtual Core i9</span>
+                                <span className="text-neon-cyan font-bold">GPU</span><span>WebGL Renderer</span>
+                                <span className="text-neon-cyan font-bold">Memory</span><span>128MB / 4GB</span>
+                            </div>
+                            <div className="flex gap-1 mt-3">
+                                <div className="w-4 h-4 bg-black"></div>
+                                <div className="w-4 h-4 bg-red-500"></div>
+                                <div className="w-4 h-4 bg-green-500"></div>
+                                <div className="w-4 h-4 bg-yellow-500"></div>
+                                <div className="w-4 h-4 bg-blue-500"></div>
+                                <div className="w-4 h-4 bg-purple-500"></div>
+                                <div className="w-4 h-4 bg-cyan-500"></div>
+                                <div className="w-4 h-4 bg-white"></div>
+                            </div>
+                        </div>
+                    </div>
+                );
+                break;
+            case 'ls':
+                let node: any = fs;
+                for (const p of currentPath) {
+                    node = node[p]?.children;
+                }
+                if (node) {
+                    output = (
+                        <div className="flex flex-wrap gap-4">
+                            {Object.entries(node).map(([name, data]: [string, any]) => (
+                                <span key={name} className={data.type === 'dir' ? 'text-neon-blue font-bold' : 'text-neon-cyan'}>
+                                    {name}{data.type === 'dir' ? '/' : ''}
+                                </span>
+                            ))}
+                        </div>
+                    );
+                }
+                break;
+            case 'cd':
+                const path = args[0];
+                if (!path) {
+                    setCurrentPath(['home', 'user']);
+                } else {
+                    const result = resolvePath(path);
+                    if (result) {
+                        setCurrentPath(result.newPath);
+                    } else {
+                        output = <span className="text-neon-pink">cd: no such file or directory: {path}</span>;
+                    }
+                }
+                break;
+            case 'pwd':
+                output = '/' + currentPath.join('/');
+                break;
+            case 'mkdir':
+                const dirName = args[0];
+                if (dirName) {
+                    setFs(prev => {
+                        const newFs = JSON.parse(JSON.stringify(prev));
+                        let node = newFs;
+                        for (const p of currentPath) {
+                            node = node[p].children;
+                        }
+                        if (node[dirName]) {
+                            output = <span className="text-neon-pink">mkdir: cannot create directory '{dirName}': File exists</span>;
+                            return prev;
+                        }
+                        node[dirName] = { type: 'dir', children: {} };
+                        return newFs;
+                    });
+                } else {
+                    output = <span className="text-neon-pink">mkdir: missing operand</span>;
+                }
+                break;
+            case 'touch':
+                const fileName = args[0];
+                if (fileName) {
+                    setFs(prev => {
+                        const newFs = JSON.parse(JSON.stringify(prev));
+                        let node = newFs;
+                        for (const p of currentPath) {
+                            node = node[p].children;
+                        }
+                        if (!node[fileName]) {
+                            node[fileName] = { type: 'file', content: '' };
+                        }
+                        return newFs;
+                    });
+                } else {
+                    output = <span className="text-neon-pink">touch: missing operand</span>;
+                }
+                break;
+            case 'rm':
+                const target = args[0];
+                if (target) {
+                    setFs(prev => {
+                        const newFs = JSON.parse(JSON.stringify(prev));
+                        let node = newFs;
+                        for (const p of currentPath) {
+                            node = node[p].children;
+                        }
+                        if (node[target]) {
+                            delete node[target];
+                        } else {
+                            output = <span className="text-neon-pink">rm: cannot remove '{target}': No such file or directory</span>;
+                            return prev;
+                        }
+                        return newFs;
+                    });
+                } else {
+                    output = <span className="text-neon-pink">rm: missing operand</span>;
+                }
+                break;
+            case 'cat':
+                const file = args[0];
+                const content = getFileContent(file);
+                if (content !== null && content !== undefined) {
+                    output = <div className="whitespace-pre-wrap text-neon-cyan/90">{content}</div>;
+                } else {
+                    output = <span className="text-neon-pink">cat: {file}: No such file</span>;
+                }
+                break;
+            case 'clear':
+                setHistory([]);
+                return;
+            case 'whoami':
+                output = 'user';
+                break;
+            case 'date':
+                output = new Date().toString();
+                break;
+            case '':
+                break;
+            default:
+                output = <span className="text-neon-pink">Command not found: {command}. Type 'help' for available commands.</span>;
         }
 
-        const output = executeCommand(command.toLowerCase(), args);
-        setHistory(prev => [...prev, { input: cmd, output }]);
+        setHistory(prev => [...prev, { command: cmd, output, path: '/' + currentPath.join('/') }]);
+        setInput('');
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            if (commandHistory.length > 0) {
-                const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
-                setHistoryIndex(newIndex);
-                setInput(commandHistory[commandHistory.length - 1 - newIndex] || '');
-            }
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            if (historyIndex > 0) {
-                const newIndex = historyIndex - 1;
-                setHistoryIndex(newIndex);
-                setInput(commandHistory[commandHistory.length - 1 - newIndex] || '');
-            } else if (historyIndex === 0) {
-                setHistoryIndex(-1);
-                setInput('');
-            }
-        } else if (e.key === 'Tab') {
-            e.preventDefault();
-            // Tab completion logic
-            const [cmd, ...args] = input.split(' ');
-            if (args.length === 0) {
-                // Complete command
-                const cmds = ['help', 'ls', 'cd', 'pwd', 'mkdir', 'touch', 'cat', 'rm', 'clear', 'echo', 'whoami', 'date'];
-                const matches = cmds.filter(c => c.startsWith(cmd));
-                if (matches.length === 1) setInput(matches[0]);
-            } else {
-                // Complete file/dir
-                const partial = args[args.length - 1];
-                const { item } = resolvePath(fs, currentPath, '.');
-                if (item && item.children) {
-                    const matches = Object.keys(item.children).filter(name => name.startsWith(partial));
-                    if (matches.length === 1) {
-                        const newInput = [...input.split(' ').slice(0, -1), matches[0]].join(' ');
-                        setInput(newInput);
-                    }
-                }
-            }
+        if (e.key === 'Enter') {
+            handleCommand(input);
         }
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        handleCommand(input);
-        setInput('');
+        if (e.key === 'l' && e.ctrlKey) {
+            e.preventDefault();
+            setHistory([]);
+        }
     };
 
     return (
         <div
-            ref={containerRef}
-            className="h-full bg-cyber-bg p-4 font-mono text-sm overflow-auto cursor-text"
+            className="h-full flex flex-col font-mono text-sm bg-cyber-dark/60 backdrop-blur-sm text-neon-cyan p-2"
             onClick={() => inputRef.current?.focus()}
         >
-            {/* History */}
-            {history.map((item, i) => (
-                <div key={i} className="mb-2">
-                    {item.input && (
-                        <div className="flex items-center gap-2 text-neon-cyan">
-                            <span className="text-neon-green">hokei@portfolio</span>
-                            <span className="text-neon-magenta">{formatPath(currentPath)}</span>
+            <div className="flex-1 overflow-auto custom-scrollbar p-2 space-y-2">
+                {history.map((item, i) => (
+                    <div key={i} className="space-y-1">
+                        <div className="flex gap-2">
+                            <span className="text-neon-green">user@hokei_os</span>
+                            <span className="text-white">:</span>
+                            <span className="text-neon-blue">{item.path}</span>
                             <span className="text-white">$</span>
-                            <span className="text-neon-cyan">{item.input}</span>
+                            <span className="text-neon-cyan/90">{item.command}</span>
                         </div>
-                    )}
-                    {item.output && (
-                        <pre className="text-neon-cyan/80 whitespace-pre-wrap mt-1 font-mono">
-                            {item.output.split('  ').map((part, idx) => (
-                                <span key={idx} dangerouslySetInnerHTML={{
-                                    __html: part.replace(/\x1b\[1;34m(.*?)\x1b\[0m/g, '<span class="text-neon-blue font-bold">$1</span>')
-                                }} />
-                            )).reduce((prev, curr) => [prev, '  ', curr] as any)}
-                        </pre>
-                    )}
-                </div>
-            ))}
+                        {item.output && <div className="pl-4">{item.output}</div>}
+                    </div>
+                ))}
+                <div ref={bottomRef} />
+            </div>
 
-            {/* Input Line */}
-            <form onSubmit={handleSubmit} className="flex items-center gap-2 text-neon-cyan">
-                <span className="text-neon-green">hokei@portfolio</span>
-                <span className="text-neon-magenta">{formatPath(currentPath)}</span>
+            <div className="flex gap-2 p-2 pt-0">
+                <span className="text-neon-green">user@hokei_os</span>
+                <span className="text-white">:</span>
+                <span className="text-neon-blue">{'/' + currentPath.join('/')}</span>
                 <span className="text-white">$</span>
                 <input
                     ref={inputRef}
@@ -347,12 +344,12 @@ Available Commands:
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="flex-1 bg-transparent outline-none text-neon-cyan caret-neon-cyan"
+                    className="flex-1 bg-transparent outline-none border-none text-neon-cyan/90 placeholder-neon-cyan/30"
                     autoFocus
                     spellCheck={false}
                     autoComplete="off"
                 />
-            </form>
+            </div>
         </div>
     );
 };
