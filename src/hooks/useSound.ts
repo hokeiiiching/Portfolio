@@ -1,3 +1,5 @@
+// src/hooks/useSound.ts
+
 // Singleton AudioContext for all sound effects
 let audioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
@@ -44,6 +46,8 @@ type SoundType = 'hover' | 'click' | 'close' | 'type' | 'error' | 'success' | 'b
 export const useSound = () => {
     const playSound = (type: SoundType) => {
         // All sounds disabled per user request
+        // reference `type` as a no-op so TS doesn't complain about unused parameter
+        void type;
         return;
     };
 
