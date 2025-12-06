@@ -40,53 +40,19 @@ export const Window: React.FC<WindowProps> = ({
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [localPos, setLocalPos] = useState(position);
-    const [tilt, setTilt] = useState({ x: 0, y: 0 });
-    const [isGlitching, setIsGlitching] = useState(true);
     const localPosRef = useRef(position);
 
-    // Trigger glitch on mount
-    useEffect(() => {
-        const timer = setTimeout(() => setIsGlitching(false), 300);
-        return () => clearTimeout(timer);
-    }, []);
-
-    // Update ref whenever localPos changes
     useEffect(() => {
         localPosRef.current = localPos;
     }, [localPos]);
 
-    // Sync local position with prop position only when prop changes
     useEffect(() => {
         setLocalPos(position);
     }, [position]);
 
-    const handleTilt = (e: React.MouseEvent) => {
-        if (isMaximized || isDragging) {
-            setTilt({ x: 0, y: 0 });
-            return;
-        }
-
-        const rect = windowRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((y - centerY) / centerY) * -2; // Max 2deg rotation
-        const rotateY = ((x - centerX) / centerX) * 2;
-
-        setTilt({ x: rotateX, y: rotateY });
-    };
-
-    const resetTilt = () => setTilt({ x: 0, y: 0 });
-
     useEffect(() => {
         if (!isDragging) return;
 
-        // Prevent text selection globally while dragging
         document.body.style.userSelect = 'none';
         document.body.style.cursor = 'move';
 
@@ -94,18 +60,13 @@ export const Window: React.FC<WindowProps> = ({
             let newX = e.clientX - dragOffset.x;
             let newY = e.clientY - dragOffset.y;
 
-            // Snapping Logic
             const SNAP_THRESHOLD = 25;
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
 
-            // Snap to Left
             if (Math.abs(newX) < SNAP_THRESHOLD) newX = 0;
-            // Snap to Top
             if (Math.abs(newY) < SNAP_THRESHOLD) newY = 0;
-            // Snap to Right
             if (Math.abs(newX + size.width - screenW) < SNAP_THRESHOLD) newX = screenW - size.width;
-            // Snap to Bottom
             if (Math.abs(newY + size.height - (screenH - 56)) < SNAP_THRESHOLD) newY = screenH - 56 - size.height;
 
             setLocalPos({ x: newX, y: newY });
@@ -139,94 +100,390 @@ export const Window: React.FC<WindowProps> = ({
         onFocus(id);
     };
 
+    // Generate random hex data for decoration
+    const hexData = React.useMemo(() => {
+        return Array.from({ length: 8 }, () =>
+            Math.random().toString(16).substr(2, 4).toUpperCase()
+        );
+    }, []);
+
+    const cornerSize = 12;
+
     return (
         <div
             ref={windowRef}
             className={`
-        absolute flex flex-col overflow-hidden transition-all duration-200
-        ${isMinimized ? 'opacity-0 scale-90 pointer-events-none translate-y-10' : 'opacity-100 scale-100'}
-        ${isMaximized ? '!inset-0 !w-full !h-[calc(100%-56px)]' : ''}
-        ${isActive
-                    ? 'shadow-window border-neon-cyan/50'
-                    : 'shadow-lg border-cyber-border/50'
-                }
-        bg-cyber-dark/95 backdrop-blur-md border rounded-lg
-        ${isGlitching ? 'window-glitch' : ''}
-      `}
+                absolute flex flex-col
+                ${isMinimized ? 'opacity-0 scale-90 pointer-events-none translate-y-10' : 'opacity-100 scale-100'}
+                ${isMaximized ? '!inset-0 !w-full !h-[calc(100%-56px)]' : ''}
+            `}
             style={{
                 zIndex,
                 left: isMaximized ? 0 : localPos.x,
                 top: isMaximized ? 0 : localPos.y,
                 width: isMaximized ? '100%' : size.width,
                 height: isMaximized ? 'calc(100% - 56px)' : size.height,
-                // Remove transition during drag for instant response
                 transition: isDragging ? 'none' : 'all 0.2s ease-out',
-                transform: isMaximized ? 'none' : `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`
+                // Angular clip-path for chamfered corners
+                clipPath: `polygon(
+                    ${cornerSize}px 0, 
+                    calc(100% - ${cornerSize}px) 0, 
+                    100% ${cornerSize}px, 
+                    100% calc(100% - ${cornerSize}px), 
+                    calc(100% - ${cornerSize}px) 100%, 
+                    ${cornerSize}px 100%, 
+                    0 calc(100% - ${cornerSize}px), 
+                    0 ${cornerSize}px
+                )`,
             }}
             onMouseDown={() => onFocus(id)}
-            onMouseMove={handleTilt}
-            onMouseLeave={resetTilt}
         >
-            {/* Title Bar */}
+            {/* ===== OUTER FRAME ===== */}
             <div
-                className={`
-          h-9 flex items-center justify-between px-3 select-none cursor-default
-          border-b transition-colors
-          ${isActive
-                        ? 'bg-cyber-surface border-neon-cyan/30'
-                        : 'bg-cyber-dark border-cyber-border'
-                    }
-        `}
-                onMouseDown={handleMouseDown}
+                className="relative flex flex-col h-full overflow-hidden"
+                style={{
+                    background: `linear-gradient(135deg, 
+                        rgba(10, 10, 15, 0.98) 0%, 
+                        rgba(15, 20, 30, 0.95) 50%,
+                        rgba(10, 10, 15, 0.98) 100%)`,
+                    border: `2px solid ${isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.15)'}`,
+                    boxShadow: isActive
+                        ? `0 0 30px var(--glow-primary), 
+                           0 0 60px var(--glow-secondary),
+                           inset 0 0 30px rgba(0,0,0,0.5)`
+                        : '0 8px 32px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.3)',
+                }}
             >
-                {/* Title */}
-                <div className="flex items-center gap-2 text-sm font-mono">
-                    <span className={isActive ? 'text-neon-cyan' : 'text-neon-cyan/50'}>
-                        {icon}
-                    </span>
-                    <span className={`truncate ${isActive ? 'text-neon-cyan' : 'text-neon-cyan/50'}`}>
-                        {title}
-                    </span>
+                {/* ===== SCAN LINE EFFECT ===== */}
+                <div
+                    className="absolute inset-0 pointer-events-none overflow-hidden z-50"
+                    style={{ opacity: isActive ? 0.15 : 0.05 }}
+                >
+                    <div
+                        className="absolute w-full h-[2px] animate-scan-line"
+                        style={{
+                            background: `linear-gradient(90deg, 
+                                transparent, 
+                                var(--color-primary) 20%, 
+                                var(--color-secondary) 50%, 
+                                var(--color-primary) 80%, 
+                                transparent)`,
+                            boxShadow: `0 0 10px var(--color-primary)`,
+                        }}
+                    />
                 </div>
 
-                {/* Window Controls */}
-                <div className="flex items-center gap-1">
-                    <button
-                        className="w-7 h-6 flex items-center justify-center rounded hover:bg-neon-yellow/20 
-                       text-neon-yellow/60 hover:text-neon-yellow transition-colors"
-                        onClick={(e) => { e.stopPropagation(); onMinimize(id); }}
-                        aria-label="Minimize"
-                    >
-                        <Minus size={14} />
-                    </button>
-                    <button
-                        className="w-7 h-6 flex items-center justify-center rounded hover:bg-neon-green/20 
-                       text-neon-green/60 hover:text-neon-green transition-colors"
-                        onClick={(e) => { e.stopPropagation(); onMaximize(id); }}
-                        aria-label="Maximize"
-                    >
-                        {isMaximized ? <Maximize2 size={12} /> : <Square size={12} />}
-                    </button>
-                    <button
-                        className="w-7 h-6 flex items-center justify-center rounded hover:bg-neon-pink/20 
-                       text-neon-pink/60 hover:text-neon-pink transition-colors"
-                        onClick={(e) => { e.stopPropagation(); onClose(id); }}
-                        aria-label="Close"
-                    >
-                        <X size={14} />
-                    </button>
+                {/* ===== CIRCUIT PATTERN OVERLAY ===== */}
+                <div
+                    className="absolute inset-0 pointer-events-none z-0"
+                    style={{
+                        opacity: isActive ? 0.03 : 0.01,
+                        backgroundImage: `
+                            linear-gradient(90deg, var(--color-primary) 1px, transparent 1px),
+                            linear-gradient(var(--color-primary) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '20px 20px',
+                    }}
+                />
+
+                {/* ===== CORNER DECORATIONS ===== */}
+                {/* Top-Left Corner */}
+                <svg className="absolute top-0 left-0 w-8 h-8 pointer-events-none z-20" viewBox="0 0 32 32">
+                    <path
+                        d="M2 16 L2 2 L16 2"
+                        fill="none"
+                        stroke={isActive ? 'var(--color-secondary)' : 'rgba(255,255,255,0.2)'}
+                        strokeWidth="2"
+                    />
+                    <circle cx="2" cy="2" r="2" fill={isActive ? 'var(--color-secondary)' : 'rgba(255,255,255,0.2)'} />
+                    <path
+                        d="M6 12 L6 6 L12 6"
+                        fill="none"
+                        stroke={isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}
+                        strokeWidth="1"
+                    />
+                </svg>
+
+                {/* Top-Right Corner */}
+                <svg className="absolute top-0 right-0 w-8 h-8 pointer-events-none z-20" viewBox="0 0 32 32">
+                    <path
+                        d="M16 2 L30 2 L30 16"
+                        fill="none"
+                        stroke={isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)'}
+                        strokeWidth="2"
+                    />
+                    <circle cx="30" cy="2" r="2" fill={isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)'} />
+                    <path
+                        d="M20 6 L26 6 L26 12"
+                        fill="none"
+                        stroke={isActive ? 'var(--color-secondary)' : 'rgba(255,255,255,0.1)'}
+                        strokeWidth="1"
+                    />
+                </svg>
+
+                {/* Bottom-Left Corner */}
+                <svg className="absolute bottom-0 left-0 w-8 h-8 pointer-events-none z-20" viewBox="0 0 32 32">
+                    <path
+                        d="M2 16 L2 30 L16 30"
+                        fill="none"
+                        stroke={isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)'}
+                        strokeWidth="2"
+                    />
+                    <circle cx="2" cy="30" r="2" fill={isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.2)'} />
+                </svg>
+
+                {/* Bottom-Right Corner */}
+                <svg className="absolute bottom-0 right-0 w-8 h-8 pointer-events-none z-20" viewBox="0 0 32 32">
+                    <path
+                        d="M16 30 L30 30 L30 16"
+                        fill="none"
+                        stroke={isActive ? 'var(--color-secondary)' : 'rgba(255,255,255,0.2)'}
+                        strokeWidth="2"
+                    />
+                    <circle cx="30" cy="30" r="2" fill={isActive ? 'var(--color-secondary)' : 'rgba(255,255,255,0.2)'} />
+                </svg>
+
+                {/* ===== HEADER BAR ===== */}
+                <div
+                    className="relative flex items-center h-10 select-none cursor-default shrink-0 z-10"
+                    style={{
+                        background: isActive
+                            ? `linear-gradient(90deg, 
+                                var(--color-panel) 0%, 
+                                rgba(var(--color-primary-rgb, 0, 245, 255), 0.1) 50%,
+                                var(--color-panel) 100%)`
+                            : 'var(--color-panel)',
+                        borderBottom: `1px solid ${isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}`,
+                    }}
+                    onMouseDown={handleMouseDown}
+                >
+                    {/* Left accent bar */}
+                    <div
+                        className="absolute left-0 top-0 bottom-0 w-1"
+                        style={{
+                            background: isActive
+                                ? `linear-gradient(180deg, var(--color-secondary), var(--color-primary))`
+                                : 'transparent'
+                        }}
+                    />
+
+                    {/* Left data readout */}
+                    <div className="flex items-center gap-1 px-3 text-[9px] font-mono opacity-40 tracking-widest">
+                        <span style={{ color: 'var(--color-primary)' }}>[</span>
+                        <span style={{ color: 'var(--color-secondary)' }}>{hexData[0]}</span>
+                        <span style={{ color: 'var(--color-primary)' }}>]</span>
+                    </div>
+
+                    {/* Title Section */}
+                    <div className="flex items-center gap-2 flex-1">
+                        {/* Icon with glow */}
+                        <div
+                            className="flex items-center justify-center w-5 h-5"
+                            style={{
+                                color: isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.4)',
+                                filter: isActive ? 'drop-shadow(0 0 4px var(--color-primary))' : 'none'
+                            }}
+                        >
+                            {icon}
+                        </div>
+
+                        {/* Title */}
+                        <span
+                            className="text-xs font-bold font-mono uppercase tracking-wider truncate"
+                            style={{
+                                color: isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.4)',
+                                textShadow: isActive ? '0 0 10px var(--glow-primary)' : 'none'
+                            }}
+                        >
+                            {title}
+                        </span>
+
+                        {/* Status indicators */}
+                        <div className="flex items-center gap-1 ml-2">
+                            <div
+                                className="w-1.5 h-1.5 rounded-full"
+                                style={{
+                                    background: isActive ? 'var(--color-success)' : 'rgba(255,255,255,0.2)',
+                                    boxShadow: isActive ? '0 0 6px var(--color-success)' : 'none',
+                                    animation: isActive ? 'pulse 2s infinite' : 'none'
+                                }}
+                            />
+                            <div
+                                className="w-1.5 h-1.5 rounded-full"
+                                style={{
+                                    background: isActive ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)',
+                                    boxShadow: isActive ? '0 0 4px var(--color-primary)' : 'none'
+                                }}
+                            />
+                            <div
+                                className="w-1.5 h-1.5 rounded-full"
+                                style={{ background: 'rgba(255,255,255,0.1)' }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right data readout */}
+                    <div className="flex items-center gap-1 px-2 text-[9px] font-mono opacity-40 tracking-widest">
+                        <span style={{ color: 'var(--color-primary)' }}>{hexData[1]}</span>
+                        <span style={{ color: 'rgba(255,255,255,0.3)' }}>:</span>
+                        <span style={{ color: 'var(--color-secondary)' }}>{hexData[2]}</span>
+                    </div>
+
+                    {/* Window Controls */}
+                    <div className="flex items-center h-full">
+                        {/* Separator */}
+                        <div
+                            className="w-px h-6 mr-1"
+                            style={{ background: 'rgba(255,255,255,0.1)' }}
+                        />
+
+                        <button
+                            className="group relative w-8 h-8 flex items-center justify-center transition-all"
+                            onClick={(e) => { e.stopPropagation(); onMinimize(id); }}
+                            aria-label="Minimize"
+                        >
+                            <div
+                                className="absolute inset-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{
+                                    background: 'rgba(255, 255, 0, 0.1)',
+                                    border: '1px solid rgba(255, 255, 0, 0.3)'
+                                }}
+                            />
+                            <Minus size={12} strokeWidth={2.5} style={{ color: 'var(--color-warning)' }} />
+                        </button>
+
+                        <button
+                            className="group relative w-8 h-8 flex items-center justify-center transition-all"
+                            onClick={(e) => { e.stopPropagation(); onMaximize(id); }}
+                            aria-label="Maximize"
+                        >
+                            <div
+                                className="absolute inset-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{
+                                    background: 'rgba(0, 255, 159, 0.1)',
+                                    border: '1px solid rgba(0, 255, 159, 0.3)'
+                                }}
+                            />
+                            {isMaximized
+                                ? <Maximize2 size={10} strokeWidth={2.5} style={{ color: 'var(--color-success)' }} />
+                                : <Square size={10} strokeWidth={2.5} style={{ color: 'var(--color-success)' }} />
+                            }
+                        </button>
+
+                        <button
+                            className="group relative w-8 h-8 flex items-center justify-center transition-all"
+                            onClick={(e) => { e.stopPropagation(); onClose(id); }}
+                            aria-label="Close"
+                        >
+                            <div
+                                className="absolute inset-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{
+                                    background: 'rgba(255, 20, 147, 0.1)',
+                                    border: '1px solid rgba(255, 20, 147, 0.3)'
+                                }}
+                            />
+                            <X size={12} strokeWidth={2.5} style={{ color: 'var(--color-accent)' }} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* ===== TOP ACCENT LINE ===== */}
+                <div
+                    className="h-[2px] shrink-0 relative overflow-hidden"
+                    style={{
+                        background: isActive
+                            ? `linear-gradient(90deg, 
+                                transparent, 
+                                var(--color-secondary) 15%, 
+                                var(--color-primary) 50%, 
+                                var(--color-secondary) 85%, 
+                                transparent)`
+                            : 'transparent'
+                    }}
+                >
+                    {/* Animated glow dot */}
+                    {isActive && (
+                        <div
+                            className="absolute top-0 w-4 h-full animate-glow-travel"
+                            style={{
+                                background: 'var(--color-primary)',
+                                boxShadow: '0 0 10px var(--color-primary), 0 0 20px var(--color-primary)',
+                                filter: 'blur(2px)'
+                            }}
+                        />
+                    )}
+                </div>
+
+                {/* ===== INNER FRAME / CONTENT WRAPPER ===== */}
+                <div className="flex-1 relative overflow-hidden m-1" style={{ background: 'var(--color-bg)' }}>
+                    {/* Inner frame border */}
+                    <div
+                        className="absolute inset-0 pointer-events-none z-10"
+                        style={{
+                            border: `1px solid ${isActive ? 'rgba(var(--color-primary-rgb, 0, 245, 255), 0.2)' : 'rgba(255,255,255,0.05)'}`,
+                        }}
+                    />
+
+                    {/* Content */}
+                    <div className="h-full overflow-auto relative z-0">
+                        {children}
+                    </div>
+                </div>
+
+                {/* ===== BOTTOM ACCENT LINE ===== */}
+                <div
+                    className="h-[2px] shrink-0"
+                    style={{
+                        background: isActive
+                            ? `linear-gradient(90deg, 
+                                var(--color-secondary), 
+                                transparent 30%, 
+                                transparent 70%, 
+                                var(--color-primary))`
+                            : 'transparent'
+                    }}
+                />
+
+                {/* ===== FOOTER STATUS BAR ===== */}
+                <div
+                    className="flex items-center justify-between h-6 px-3 shrink-0 z-10"
+                    style={{
+                        background: 'var(--color-panel)',
+                        borderTop: `1px solid ${isActive ? 'rgba(var(--color-primary-rgb, 0, 245, 255), 0.2)' : 'rgba(255,255,255,0.05)'}`,
+                    }}
+                >
+                    {/* Left status data */}
+                    <div className="flex items-center gap-2 text-[8px] font-mono tracking-wider opacity-40">
+                        <span style={{ color: 'var(--color-primary)' }}>SYS</span>
+                        <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+                        <span style={{ color: 'var(--color-secondary)' }}>{hexData[3]}:{hexData[4]}</span>
+                    </div>
+
+                    {/* Center indicator */}
+                    <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="w-1 h-1"
+                                style={{
+                                    background: isActive && i < 3
+                                        ? 'var(--color-primary)'
+                                        : 'rgba(255,255,255,0.1)',
+                                    boxShadow: isActive && i < 3 ? '0 0 3px var(--color-primary)' : 'none'
+                                }}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Right status data */}
+                    <div className="flex items-center gap-2 text-[8px] font-mono tracking-wider opacity-40">
+                        <span style={{ color: 'var(--color-success)' }}>●</span>
+                        <span style={{ color: 'var(--color-primary)' }}>ACTIVE</span>
+                        <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+                        <span style={{ color: 'var(--color-secondary)' }}>{hexData[5]}</span>
+                    </div>
                 </div>
             </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-auto bg-cyber-bg/80">
-                {children}
-            </div>
-
-            {/* Glow effect when active */}
-            {isActive && (
-                <div className="absolute inset-0 pointer-events-none rounded-lg border border-neon-cyan/20" />
-            )}
         </div>
     );
 };

@@ -44,10 +44,12 @@ const INITIAL_FS: FileSystem = {
 };
 
 const NEOFETCH_ART = `
-       .---.
-      /     \\
-      \\.    /
-       '-..-'
+    ██╗  ██╗ ██████╗ ██╗  ██╗███████╗██╗
+    ██║  ██║██╔═══██╗██║ ██╔╝██╔════╝██║
+    ███████║██║   ██║█████╔╝ █████╗  ██║
+    ██╔══██║██║   ██║██╔═██╗ ██╔══╝  ██║
+    ██║  ██║╚██████╔╝██║  ██╗███████╗██║
+    ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝
 `;
 
 export const TerminalApp: React.FC = () => {
@@ -314,37 +316,37 @@ export const TerminalApp: React.FC = () => {
 
     return (
         <div
-            className="h-full flex flex-col font-mono text-sm bg-cyber-dark/60 backdrop-blur-sm text-neon-cyan p-2"
+            className="h-full flex flex-col font-mono text-sm bg-gradient-to-br from-cyber-dark/80 via-cyber-bg/90 to-cyber-dark/80 backdrop-blur-md text-neon-cyan"
             onClick={() => inputRef.current?.focus()}
         >
-            <div className="flex-1 overflow-auto custom-scrollbar p-2 space-y-2">
+            <div className="flex-1 overflow-auto custom-scrollbar p-4 space-y-3">
                 {history.map((item, i) => (
                     <div key={i} className="space-y-1">
-                        <div className="flex gap-2">
-                            <span className="text-neon-green">user@hokei_os</span>
-                            <span className="text-white">:</span>
+                        <div className="flex gap-2 items-center">
+                            <span className="text-neon-green font-semibold">user@hokei_os</span>
+                            <span className="text-neon-cyan/50">:</span>
                             <span className="text-neon-blue">{item.path}</span>
-                            <span className="text-white">$</span>
-                            <span className="text-neon-cyan/90">{item.command}</span>
+                            <span className="text-neon-magenta">$</span>
+                            <span className="text-neon-cyan">{item.command}</span>
                         </div>
-                        {item.output && <div className="pl-4">{item.output}</div>}
+                        {item.output && <div className="pl-4 mt-1 text-neon-cyan/80">{item.output}</div>}
                     </div>
                 ))}
                 <div ref={bottomRef} />
             </div>
 
-            <div className="flex gap-2 p-2 pt-0">
-                <span className="text-neon-green">user@hokei_os</span>
-                <span className="text-white">:</span>
+            <div className="flex gap-2 p-4 pt-2 border-t border-neon-cyan/10 bg-cyber-dark/30">
+                <span className="text-neon-green font-semibold">user@hokei_os</span>
+                <span className="text-neon-cyan/50">:</span>
                 <span className="text-neon-blue">{'/' + currentPath.join('/')}</span>
-                <span className="text-white">$</span>
+                <span className="text-neon-magenta">$</span>
                 <input
                     ref={inputRef}
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="flex-1 bg-transparent outline-none border-none text-neon-cyan/90 placeholder-neon-cyan/30"
+                    className="flex-1 bg-transparent outline-none border-none text-neon-cyan caret-neon-cyan placeholder-neon-cyan/30"
                     autoFocus
                     spellCheck={false}
                     autoComplete="off"

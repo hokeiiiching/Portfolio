@@ -66,24 +66,23 @@ const WALLPAPERS = [
 ];
 
 // Animated wallpaper component
-const CyberpunkWallpaper = React.memo<{ backgroundImage?: string }>(({ backgroundImage }) => (
-    <div className="absolute inset-0 overflow-hidden transition-all duration-1000">
-        {/* Background Image or Base Gradient */}
-        {backgroundImage ? (
-            <>
-                <div
-                    className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
-                    style={{ backgroundImage: `url(${backgroundImage})` }}
-                />
-                {/* Dark overlay for readability - Reduced opacity and removed blur for clarity */}
+// Animated wallpaper component with smooth cross-fade
+const CyberpunkWallpaper = React.memo<{ activeIndex: number }>(({ activeIndex }) => (
+    <div className="absolute inset-0 overflow-hidden">
+        {WALLPAPERS.map((src, index) => (
+            <div
+                key={src}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 delay-1000'
+                    }`}
+                style={{ backgroundImage: `url(${src})` }}
+            >
+                {/* Dark overlay for readability */}
                 <div className="absolute inset-0 bg-cyber-bg/30" />
-            </>
-        ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-cyber-bg via-purple-950/30 to-cyber-bg" />
-        )}
+            </div>
+        ))}
 
-        {/* Vignette - Reduced opacity */}
-        <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-cyber-bg/30 pointer-events-none" />
+        {/* Vignette - Static overlay on top of all images */}
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-cyber-bg/30 pointer-events-none z-20" />
     </div>
 ));
 
@@ -129,7 +128,7 @@ export const Desktop: React.FC = () => {
                     clearInterval(progressInterval);
                     setTimeout(() => {
                         setIsBooting(false);
-                        playSound('open'); // Boot complete sound
+                        playSound('success'); // Boot complete sound
                     }, 300);
                     return 100;
                 }
@@ -159,14 +158,14 @@ export const Desktop: React.FC = () => {
                 setWindows(prev => prev.map(w =>
                     w.id === appId ? { ...w, isMinimized: false, zIndex: nextZIndex } : w
                 ));
-                playSound('open');
+                playSound('click');
             }
             setActiveWindowId(appId);
             setNextZIndex(prev => prev + 1);
             return;
         }
 
-        playSound('open');
+        playSound('click');
         unlockAchievement('explorer'); // Track app open
 
         let component: React.ReactNode;
@@ -351,7 +350,7 @@ export const Desktop: React.FC = () => {
                     <button
                         onClick={() => {
                             setBootSkipped(true);
-                            playSound('open');
+                            playSound('click');
                         }}
                         className="mt-8 text-[10px] text-neon-cyan/40 hover:text-neon-cyan uppercase tracking-widest border border-transparent hover:border-neon-cyan/30 px-3 py-1 rounded transition-all"
                     >
@@ -368,7 +367,7 @@ export const Desktop: React.FC = () => {
             onContextMenu={handleDesktopContextMenu}
         >
             {/* Animated Cyberpunk Wallpaper */}
-            <CyberpunkWallpaper backgroundImage={WALLPAPERS[wallpaperIndex]} />
+            <CyberpunkWallpaper activeIndex={wallpaperIndex} />
 
             {/* Scanline effect overlay */}
             {scanlinesEnabled && (

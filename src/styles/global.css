@@ -4,6 +4,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   THEME SYSTEM - CSS Custom Properties
+   ============================================ */
+
+/* Default Cyberpunk Theme */
+:root,
+body.cyberpunk {
+    --color-primary: #00f5ff;
+    --color-primary-rgb: 0, 245, 255;
+    --color-secondary: #ff00ff;
+    --color-accent: #ff1493;
+    --color-success: #00ff9f;
+    --color-warning: #ffff00;
+    --color-bg: #0a0a0f;
+    --color-surface: #1a1f2e;
+    --color-panel: #141922;
+    --glow-primary: rgba(0, 245, 255, 0.5);
+    --glow-secondary: rgba(255, 0, 255, 0.5);
+}
+
+/* Matrix Theme - Green Hacker */
+body.matrix {
+    --color-primary: #00ff41;
+    --color-primary-rgb: 0, 255, 65;
+    --color-secondary: #008f11;
+    --color-accent: #39ff14;
+    --color-success: #00ff41;
+    --color-warning: #ccff00;
+    --color-bg: #0d0d0d;
+    --color-surface: #0a1a0a;
+    --color-panel: #0f1f0f;
+    --glow-primary: rgba(0, 255, 65, 0.5);
+    --glow-secondary: rgba(0, 143, 17, 0.5);
+}
+
+/* Synthwave Theme - Purple/Orange Sunset */
+body.synthwave {
+    --color-primary: #ff6ec7;
+    --color-primary-rgb: 255, 110, 199;
+    --color-secondary: #7b68ee;
+    --color-accent: #ff9f43;
+    --color-success: #1dd1a1;
+    --color-warning: #feca57;
+    --color-bg: #1a0a2e;
+    --color-surface: #2d1b4e;
+    --color-panel: #241942;
+    --glow-primary: rgba(255, 110, 199, 0.5);
+    --glow-secondary: rgba(123, 104, 238, 0.5);
+}
+
 @layer base {
     * {
         box-sizing: border-box;
@@ -17,10 +67,11 @@
         width: 100%;
         overflow: hidden;
         font-family: 'JetBrains Mono', monospace;
-        background-color: #0a0a0f;
-        color: #00f5ff;
+        background-color: var(--color-bg);
+        color: var(--color-primary);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     #root {
@@ -35,21 +86,21 @@
     }
 
     ::-webkit-scrollbar-track {
-        background: #0d1117;
+        background: var(--color-panel);
     }
 
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #00f5ff 0%, #ff00ff 100%);
+        background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         border-radius: 3px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: #00f5ff;
+        background: var(--color-primary);
     }
 
     /* Selection */
     ::selection {
-        background: rgba(0, 245, 255, 0.3);
+        background: var(--glow-primary);
         color: #ffffff;
     }
 }
@@ -85,5 +136,190 @@
         background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.2), transparent);
         animation: scan-line 4s linear infinite;
         pointer-events: none;
+    }
+
+    /* Holographic Display Effects */
+    .holo-grid {
+        position: relative;
+    }
+
+    .holo-grid::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(0, 245, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 245, 255, 0.02) 1px, transparent 1px);
+        background-size: 24px 24px;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.4;
+    }
+
+    /* Clean sci-fi panel border */
+    .holo-border {
+        position: relative;
+        border: 1px solid rgba(255, 0, 255, 0.35);
+        box-shadow:
+            0 0 8px rgba(255, 0, 255, 0.12),
+            0 0 1px rgba(0, 245, 255, 0.3),
+            inset 0 1px 0 rgba(0, 245, 255, 0.1);
+    }
+
+    /* Corner brackets - Pink/Magenta accent */
+    .holo-border::before,
+    .holo-border::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 0, 255, 0.7);
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    /* Top-left corner */
+    .holo-border::before {
+        top: -1px;
+        left: -1px;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    /* Bottom-right corner */
+    .holo-border::after {
+        bottom: -1px;
+        right: -1px;
+        border-left: none;
+        border-top: none;
+    }
+
+    /* Additional corner brackets - Cyan accent */
+    .holo-corners::before,
+    .holo-corners::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 245, 255, 0.7);
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    /* Top-right corner */
+    .holo-corners::before {
+        top: -1px;
+        right: -1px;
+        border-left: none;
+        border-bottom: none;
+    }
+
+    /* Bottom-left corner */
+    .holo-corners::after {
+        bottom: -1px;
+        left: -1px;
+        border-right: none;
+        border-top: none;
+    }
+
+    .holo-glow {
+        animation: holo-glow-pulse 6s ease-in-out infinite;
+    }
+
+    @keyframes holo-glow-pulse {
+
+        0%,
+        100% {
+            box-shadow:
+                0 0 8px rgba(255, 0, 255, 0.12),
+                0 0 1px rgba(0, 245, 255, 0.3),
+                inset 0 1px 0 rgba(0, 245, 255, 0.1);
+        }
+
+        50% {
+            box-shadow:
+                0 0 12px rgba(255, 0, 255, 0.18),
+                0 0 2px rgba(0, 245, 255, 0.4),
+                inset 0 1px 0 rgba(0, 245, 255, 0.15);
+        }
+    }
+
+    /* Clean accent line for title bars */
+    .cyber-accent-line {
+        position: relative;
+    }
+
+    .cyber-accent-line::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 0, 255, 0.6) 20%,
+                rgba(0, 245, 255, 0.4) 50%,
+                rgba(255, 0, 255, 0.6) 80%,
+                transparent);
+    }
+}
+
+/* ============================================
+   WINDOW TERMINAL ANIMATIONS
+   ============================================ */
+
+/* Scan line animation - sweeps vertically */
+@keyframes scan-line {
+    0% {
+        top: -2px;
+    }
+
+    100% {
+        top: 100%;
+    }
+}
+
+.animate-scan-line {
+    animation: scan-line 4s linear infinite;
+}
+
+/* Glow dot traveling along accent line */
+@keyframes glow-travel {
+    0% {
+        left: -16px;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        left: 100%;
+        opacity: 0;
+    }
+}
+
+.animate-glow-travel {
+    animation: glow-travel 3s ease-in-out infinite;
+}
+
+/* Pulse animation for status indicators */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.9);
     }
 }

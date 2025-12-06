@@ -70,9 +70,20 @@ export const Taskbar: React.FC<TaskbarProps> = ({
     };
 
     return (
-        <div className="h-14 bg-cyber-dark/95 backdrop-blur-md border-t border-neon-cyan/30 flex items-center px-2 z-[1000] relative">
-            {/* Glow line at top */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-cyan to-transparent" />
+        <div
+            className="h-14 backdrop-blur-md flex items-center px-2 z-[1000] relative"
+            style={{
+                background: 'var(--color-panel)',
+                borderTop: '1px solid var(--color-secondary)',
+            }}
+        >
+            {/* Accent line at top */}
+            <div
+                className="absolute top-0 left-0 right-0 h-[2px]"
+                style={{
+                    background: 'linear-gradient(90deg, transparent, var(--color-secondary), var(--color-primary), transparent)',
+                }}
+            />
 
             {/* Left Section - Pinned Apps */}
             <div className="flex items-center gap-1 h-full">

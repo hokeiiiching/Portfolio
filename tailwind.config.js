@@ -7,26 +7,31 @@ export default {
     theme: {
         extend: {
             colors: {
+                // Theme-aware colors using CSS variables
                 cyber: {
-                    bg: '#0a0a0f',
-                    dark: '#0d1117',
-                    panel: '#141922',
-                    surface: '#1a1f2e',
-                    border: '#2a3441',
+                    bg: 'var(--color-bg)',
+                    dark: 'var(--color-bg)',
+                    panel: 'var(--color-panel)',
+                    surface: 'var(--color-surface)',
+                    border: 'rgba(var(--color-primary-rgb, 0, 245, 255), 0.2)',
                 },
                 neon: {
-                    cyan: '#00f5ff',
-                    magenta: '#ff00ff',
-                    pink: '#ff1493',
-                    green: '#00ff9f',
-                    yellow: '#ffff00',
-                    orange: '#ff6600',
-                    blue: '#0066ff',
+                    // Primary color (cyan in cyberpunk, green in matrix, pink in synthwave)
+                    cyan: 'var(--color-primary)',
+                    // Secondary color
+                    magenta: 'var(--color-secondary)',
+                    // Accent color
+                    pink: 'var(--color-accent)',
+                    // Semantic colors
+                    green: 'var(--color-success)',
+                    yellow: 'var(--color-warning)',
+                    orange: 'var(--color-accent)',
+                    blue: 'var(--color-primary)',
                 },
                 glow: {
-                    cyan: 'rgba(0, 245, 255, 0.5)',
-                    magenta: 'rgba(255, 0, 255, 0.5)',
-                    pink: 'rgba(255, 20, 147, 0.5)',
+                    cyan: 'var(--glow-primary)',
+                    magenta: 'var(--glow-secondary)',
+                    pink: 'var(--glow-secondary)',
                 },
             },
             fontFamily: {
