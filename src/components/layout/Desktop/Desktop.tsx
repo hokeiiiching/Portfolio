@@ -5,8 +5,8 @@ import { useKonamiCode } from '../../../hooks/useKonamiCode';
 import { useAchievements } from '../../../contexts/AchievementsContext';
 import {
     FileCode, Mail, User, Terminal, FolderOpen, Settings,
-    FileText, Cpu, Gamepad2, Music, Briefcase, Share2,
-    RefreshCw, Info, Image, ExternalLink, Trash2, Copy
+    FileText, Cpu, Gamepad2, Music,
+    RefreshCw, Info, Image, ExternalLink
 } from 'lucide-react';
 import { Window } from '../../ui/Window/Window';
 import { Taskbar } from '../Taskbar/Taskbar';
