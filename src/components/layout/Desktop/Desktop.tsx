@@ -5,11 +5,13 @@ import { useKonamiCode } from '../../../hooks/useKonamiCode';
 import { useAchievements } from '../../../contexts/AchievementsContext';
 import {
     FileCode, Mail, User, Terminal, FolderOpen, Settings,
+    FileText, Cpu, Gamepad2, Music, Briefcase, Share2,
     RefreshCw, Info, Image, ExternalLink, Trash2, Copy
 } from 'lucide-react';
 import { Window } from '../../ui/Window/Window';
 import { Taskbar } from '../Taskbar/Taskbar';
-import { DesktopIcon } from '../../ui/DesktopIcon/DesktopIcon';
+// import { DesktopIcon } from '../../ui/DesktopIcon/DesktopIcon'; // Removed
+import { HoloCarousel } from '../../ui/HoloCarousel/HoloCarousel';
 import { useContextMenu } from '../../ui/ContextMenu/ContextMenu';
 import { Resume } from '../../../apps/Resume/Resume';
 import { Projects } from '../../../apps/Projects/Projects';
@@ -21,15 +23,7 @@ import { MusicApp } from '../../../apps/Music/Music';
 import { GamesApp } from '../../../apps/Games/Games';
 import { SettingsApp } from '../../../apps/Settings/Settings';
 import {
-    CyberUserIcon,
-    CyberFolderIcon,
-    CyberTerminalIcon,
-    CyberDocumentIcon,
-    CyberMessageIcon,
-    CyberSettingsIcon,
-    CyberSkillsIcon,
-    CyberMusicIcon,
-    CyberGamesIcon,
+    // CyberIcons imports removed
 } from '../../ui/CyberIcons/CyberIcons';
 
 interface WindowState {
@@ -46,16 +40,17 @@ interface WindowState {
 }
 
 // Desktop icons with cyberpunk SVG icons
+// Desktop icons with Lucide icons (Clean, bold, glowing)
 const DESKTOP_ICONS = [
-    { id: 'about', label: 'About_Me.exe', icon: <CyberUserIcon size={52} glowColor="#00f5ff" />, color: 'cyan' },
-    { id: 'projects', label: 'Projects.dir', icon: <CyberFolderIcon size={52} glowColor="#ff00ff" />, color: 'magenta' },
-    { id: 'resume', label: 'Resume.pdf', icon: <CyberDocumentIcon size={52} glowColor="#00f5ff" />, color: 'cyan' },
-    { id: 'terminal', label: 'Terminal.sh', icon: <CyberTerminalIcon size={52} glowColor="#00ff9f" />, color: 'green' },
-    { id: 'contact', label: 'Contact.msg', icon: <CyberMessageIcon size={52} glowColor="#ff1493" />, color: 'pink' },
-    { id: 'skills', label: 'Skills.db', icon: <CyberSkillsIcon size={52} glowColor="#00f5ff" />, color: 'cyan' },
-    { id: 'music', label: 'Music.app', icon: <CyberMusicIcon size={52} glowColor="#ff6600" />, color: 'orange' },
-    { id: 'games', label: 'Games.exe', icon: <CyberGamesIcon size={52} glowColor="#0066ff" />, color: 'blue' },
-    { id: 'settings', label: 'Settings.cfg', icon: <CyberSettingsIcon size={52} glowColor="#ffff00" />, color: 'yellow' },
+    { id: 'about', label: 'About Me', icon: <User size={48} className="text-neon-cyan drop-shadow-[0_0_10px_rgba(0,245,255,0.6)]" />, color: 'cyan' },
+    { id: 'projects', label: 'Projects', icon: <FolderOpen size={48} className="text-neon-magenta drop-shadow-[0_0_10px_rgba(255,0,255,0.6)]" />, color: 'magenta' },
+    { id: 'contact', label: 'Contact', icon: <Mail size={48} className="text-neon-pink drop-shadow-[0_0_10px_rgba(255,20,147,0.6)]" />, color: 'pink' },
+    { id: 'terminal', label: 'Terminal', icon: <Terminal size={48} className="text-neon-green drop-shadow-[0_0_10px_rgba(0,255,159,0.6)]" />, color: 'green' },
+    { id: 'skills', label: 'Skills', icon: <Cpu size={48} className="text-neon-cyan drop-shadow-[0_0_10px_rgba(0,245,255,0.6)]" />, color: 'cyan' },
+    { id: 'resume', label: 'Resume', icon: <FileText size={48} className="text-neon-cyan drop-shadow-[0_0_10px_rgba(0,245,255,0.6)]" />, color: 'cyan' },
+    { id: 'music', label: 'Music', icon: <Music size={48} className="text-neon-orange drop-shadow-[0_0_10px_rgba(255,165,0,0.6)]" />, color: 'orange' },
+    { id: 'games', label: 'Games', icon: <Gamepad2 size={48} className="text-neon-blue drop-shadow-[0_0_10px_rgba(0,102,255,0.6)]" />, color: 'blue' },
+    { id: 'settings', label: 'Settings', icon: <Settings size={48} className="text-neon-yellow drop-shadow-[0_0_10px_rgba(255,255,0,0.6)]" />, color: 'yellow' },
 ];
 
 // Wallpaper configuration - User can add more images here
@@ -76,8 +71,8 @@ const CyberpunkWallpaper = React.memo<{ activeIndex: number }>(({ activeIndex })
                     }`}
                 style={{ backgroundImage: `url(${src})` }}
             >
-                {/* Dark overlay for readability */}
-                <div className="absolute inset-0 bg-cyber-bg/30" />
+                {/* Dark overlay for readability - Increased opacity per user request */}
+                <div className="absolute inset-0 bg-cyber-bg/80" />
             </div>
         ))}
 
@@ -212,19 +207,19 @@ export const Desktop: React.FC = () => {
                 component = <SkillsApp />;
                 title = 'skills.db';
                 size = { width: 600, height: 550 };
-                icon = <CyberSkillsIcon size={14} glowColor="#00f5ff" />;
+                icon = <Cpu size={14} />;
                 break;
             case 'music':
                 component = <MusicApp />;
                 title = 'music.app';
                 size = { width: 400, height: 600 };
-                icon = <CyberMusicIcon size={14} glowColor="#ff6600" />;
+                icon = <Music size={14} />;
                 break;
             case 'games':
                 component = <GamesApp />;
                 title = 'arcade.exe';
                 size = { width: 500, height: 500 };
-                icon = <CyberGamesIcon size={14} glowColor="#0066ff" />;
+                icon = <Gamepad2 size={14} />;
                 break;
             default:
                 return;
@@ -296,6 +291,8 @@ export const Desktop: React.FC = () => {
     };
 
     // Icon context menu
+    /* Unused
+    // Icon context menu
     const handleIconContextMenu = (e: React.MouseEvent, iconId: string, iconLabel: string) => {
         e.stopPropagation();
         playSound('click');
@@ -307,6 +304,7 @@ export const Desktop: React.FC = () => {
             { label: 'Delete', icon: <Trash2 size={14} />, disabled: true },
         ]);
     };
+    */
 
     if (isBooting) {
         return (
@@ -374,22 +372,9 @@ export const Desktop: React.FC = () => {
                 <div className="absolute inset-0 pointer-events-none opacity-30 scanline" />
             )}
 
-            {/* Desktop Icons */}
-            <div className="flex-1 p-6 flex flex-col flex-wrap content-start gap-2 relative z-10">
-                {DESKTOP_ICONS.map(icon => (
-                    <div
-                        key={icon.id}
-                        onContextMenu={(e) => handleIconContextMenu(e, icon.id, icon.label)}
-                    >
-                        <DesktopIcon
-                            id={icon.id}
-                            label={icon.label}
-                            icon={icon.icon}
-                            color={icon.color}
-                            onDoubleClick={openApp}
-                        />
-                    </div>
-                ))}
+            {/* Desktop Icons - Holographic Carousel */}
+            <div className="flex-1 relative z-10">
+                <HoloCarousel items={DESKTOP_ICONS} onLaunch={openApp} />
             </div>
 
             {/* Windows */}

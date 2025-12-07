@@ -8,20 +8,37 @@
    THEME SYSTEM - CSS Custom Properties
    ============================================ */
 
-/* Default Cyberpunk Theme */
+/* Default Cyberpunk Theme - Soft & Comfortable Redesign */
 :root,
 body.cyberpunk {
-    --color-primary: #00f5ff;
-    --color-primary-rgb: 0, 245, 255;
-    --color-secondary: #ff00ff;
-    --color-accent: #ff1493;
-    --color-success: #00ff9f;
-    --color-warning: #ffff00;
-    --color-bg: #0a0a0f;
-    --color-surface: #1a1f2e;
-    --color-panel: #141922;
-    --glow-primary: rgba(0, 245, 255, 0.5);
-    --glow-secondary: rgba(255, 0, 255, 0.5);
+    /* Primary: Soft Cyan/Ice Blue (Easy on eyes, high readability) */
+    --color-primary: #64d2ff;
+    --color-primary-rgb: 100, 210, 255;
+
+    /* Secondary: Soft Lavender (Complementary, calming) */
+    --color-secondary: #d478ff;
+
+    /* Accent: Pastel Pink */
+    --color-accent: #ff85c2;
+
+    /* Success: Soft Mint */
+    --color-success: #4fd6be;
+
+    /* Warning: Soft Gold */
+    --color-warning: #ffd166;
+
+    /* Background: Deep Matte Navy (Reduces contrast glare vs pitch black) */
+    --color-bg: #13141f;
+
+    /* Surface: Slightly lighter navy for depth */
+    --color-surface: #1e2235;
+
+    /* Panel: Deep Clay/Slate blue */
+    --color-panel: #1a1d2e;
+
+    /* Glow: Reduced opacity for comfort (0.5 -> 0.25) */
+    --glow-primary: rgba(100, 210, 255, 0.25);
+    --glow-secondary: rgba(212, 120, 255, 0.25);
 }
 
 /* Matrix Theme - Green Hacker */
