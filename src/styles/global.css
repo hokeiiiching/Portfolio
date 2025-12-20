@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,8 +8,45 @@
    THEME SYSTEM - CSS Custom Properties
    ============================================ */
 
-/* Default Cyberpunk Theme - Soft & Comfortable Redesign */
+/* Modern Theme - Clean AI Website Aesthetic (DEFAULT) */
 :root,
+body.modern {
+    /* Primary: Clean Blue-Gray */
+    --color-primary: #e2e8f0;
+    --color-primary-rgb: 226, 232, 240;
+
+    /* Secondary: Subtle Violet */
+    --color-secondary: #a78bfa;
+
+    /* Accent: Soft Purple/Blue gradient accent */
+    --color-accent: #818cf8;
+
+    /* Success: Clean Emerald */
+    --color-success: #34d399;
+
+    /* Warning: Soft Amber */
+    --color-warning: #fbbf24;
+
+    /* Background: Deep Slate (Modern dark mode) */
+    --color-bg: #0f172a;
+
+    /* Surface: Slightly lighter slate */
+    --color-surface: #1e293b;
+
+    /* Panel: Mid slate for panels/taskbar */
+    --color-panel: #1e293b;
+
+    /* Glow: Very subtle, almost none */
+    --glow-primary: rgba(226, 232, 240, 0.08);
+    --glow-secondary: rgba(167, 139, 250, 0.1);
+
+    /* Modern theme specific */
+    --modern-font: 'Inter', system-ui, sans-serif;
+    --border-radius: 12px;
+    --window-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Cyberpunk Theme - Soft Neon */
 body.cyberpunk {
     /* Primary: Soft Cyan/Ice Blue (Easy on eyes, high readability) */
     --color-primary: #64d2ff;
@@ -39,6 +76,11 @@ body.cyberpunk {
     /* Glow: Reduced opacity for comfort (0.5 -> 0.25) */
     --glow-primary: rgba(100, 210, 255, 0.25);
     --glow-secondary: rgba(212, 120, 255, 0.25);
+
+    /* Cyberpunk specific */
+    --modern-font: 'JetBrains Mono', monospace;
+    --border-radius: 4px;
+    --window-border: var(--color-primary);
 }
 
 /* Matrix Theme - Green Hacker */
@@ -54,6 +96,9 @@ body.matrix {
     --color-panel: #0f1f0f;
     --glow-primary: rgba(0, 255, 65, 0.5);
     --glow-secondary: rgba(0, 143, 17, 0.5);
+    --modern-font: 'JetBrains Mono', monospace;
+    --border-radius: 4px;
+    --window-border: var(--color-primary);
 }
 
 /* Synthwave Theme - Purple/Orange Sunset */
@@ -69,6 +114,9 @@ body.synthwave {
     --color-panel: #241942;
     --glow-primary: rgba(255, 110, 199, 0.5);
     --glow-secondary: rgba(123, 104, 238, 0.5);
+    --modern-font: 'JetBrains Mono', monospace;
+    --border-radius: 4px;
+    --window-border: var(--color-primary);
 }
 
 @layer base {
@@ -83,7 +131,7 @@ body.synthwave {
         height: 100%;
         width: 100%;
         overflow: hidden;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--modern-font, 'Inter', system-ui, sans-serif);
         background-color: var(--color-bg);
         color: var(--color-primary);
         -webkit-font-smoothing: antialiased;

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSound } from '../../../hooks/useSound';
+import { useSettings } from '../../../contexts/SettingsContext';
 import {
     User, FolderOpen, FileCode, Terminal, Mail, Settings,
     Wifi, Volume2, Battery, Cpu,
-    Activity, Github, Linkedin, Globe
+    Activity, Github, Linkedin, Globe, Search, X
 } from 'lucide-react';
 
 interface WindowState {
@@ -19,6 +20,8 @@ interface TaskbarProps {
     activeWindowId: string | null;
     onWindowClick: (id: string) => void;
     onAppClick: (id: string) => void;
+    searchTerm: string;
+    onSearchChange: (term: string) => void;
 }
 
 const PINNED_APPS = [
@@ -41,11 +44,15 @@ export const Taskbar: React.FC<TaskbarProps> = ({
     activeWindowId,
     onWindowClick,
     onAppClick,
+    searchTerm,
+    onSearchChange,
 }) => {
     const [time, setTime] = useState(new Date());
     const [cpuUsage] = useState(Math.floor(Math.random() * 30) + 10);
     const [ramUsage] = useState(Math.floor(Math.random() * 40) + 30);
     const { playSound } = useSound();
+    const { theme } = useSettings();
+    const isModernTheme = theme === 'modern';
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
@@ -56,9 +63,15 @@ export const Taskbar: React.FC<TaskbarProps> = ({
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     };
 
-    const openWindows = windows.filter(w => w.isOpen !== false);
+    // Fixed: explicitly check isOpen === true to properly track open windows
+    const openWindows = windows.filter(w => w.isOpen === true);
 
     const getColorClass = (color: string) => {
+        if (isModernTheme) {
+            // Modern theme: neutral colors with subtle hover effects
+            return 'text-slate-300 hover:text-white hover:bg-white/10';
+        }
+        // Cyberpunk themes: neon colors
         const colors: Record<string, string> = {
             cyan: 'text-neon-cyan hover:bg-neon-cyan/20 hover:shadow-neon-cyan',
             magenta: 'text-neon-magenta hover:bg-neon-magenta/20 hover:shadow-neon-magenta',
@@ -71,19 +84,21 @@ export const Taskbar: React.FC<TaskbarProps> = ({
 
     return (
         <div
-            className="h-14 backdrop-blur-md flex items-center px-2 z-[1000] relative"
+            className="h-14 backdrop-blur-md flex items-center px-2 z-[1000] relative shrink-0"
             style={{
-                background: 'var(--color-panel)',
-                borderTop: '1px solid var(--color-secondary)',
+                background: isModernTheme ? 'rgba(15, 23, 42, 0.9)' : 'var(--color-panel)',
+                borderTop: isModernTheme ? '1px solid rgba(255,255,255,0.1)' : '1px solid var(--color-secondary)',
             }}
         >
-            {/* Accent line at top */}
-            <div
-                className="absolute top-0 left-0 right-0 h-[2px]"
-                style={{
-                    background: 'linear-gradient(90deg, transparent, var(--color-secondary), var(--color-primary), transparent)',
-                }}
-            />
+            {/* Accent line at top - only for non-modern themes */}
+            {!isModernTheme && (
+                <div
+                    className="absolute top-0 left-0 right-0 h-[2px]"
+                    style={{
+                        background: 'linear-gradient(90deg, transparent, var(--color-secondary), var(--color-primary), transparent)',
+                    }}
+                />
+            )}
 
             {/* Left Section - Pinned Apps */}
             <div className="flex items-center gap-1 h-full">
@@ -112,15 +127,21 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                             {/* Active/Open indicator */}
                             {isOpen && (
                                 <div className={`
-                  absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 transition-all
-                  ${isActive ? 'w-6 bg-neon-cyan shadow-neon-cyan' : 'w-2 bg-neon-cyan/50'}
+                  absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 transition-all rounded-full
+                  ${isModernTheme
+                                        ? (isActive ? 'w-6 bg-white' : 'w-2 bg-white/50')
+                                        : (isActive ? 'w-6 bg-neon-cyan shadow-neon-cyan' : 'w-2 bg-neon-cyan/50')
+                                    }
                 `} />
                             )}
 
                             {/* Tooltip */}
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 
-                             bg-cyber-surface border border-neon-cyan/30 rounded text-xs text-neon-cyan
-                             opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded text-xs
+                             opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none
+                             ${isModernTheme
+                                    ? 'bg-slate-800 border border-white/10 text-white/90'
+                                    : 'bg-cyber-surface border border-neon-cyan/30 text-neon-cyan'
+                                }`}>
                                 {app.label}
                             </div>
                         </button>
@@ -129,10 +150,42 @@ export const Taskbar: React.FC<TaskbarProps> = ({
             </div>
 
             {/* Separator */}
-            <div className="w-px h-8 bg-neon-cyan/20 mx-3" />
+            <div className={`w-px h-8 mx-3 ${isModernTheme ? 'bg-white/10' : 'bg-neon-cyan/20'}`} />
 
-            {/* Center Section - Open Windows (if any that aren't in pinned) */}
-            <div className="flex-1 flex items-center gap-1 h-full overflow-x-auto">
+            {/* Center Section - Search Bar + Open Windows */}
+            <div className="flex-1 flex items-center gap-3 h-full overflow-x-auto">
+                {/* Search Input */}
+                <div className="relative flex items-center">
+                    <Search size={14} className={`absolute left-3 ${isModernTheme ? 'text-white/40' : 'text-neon-cyan/50'}`} />
+                    <input
+                        type="text"
+                        placeholder="Search apps..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                            onSearchChange(e.target.value);
+                            playSound('hover');
+                        }}
+                        className={`
+                            pl-9 pr-8 py-1.5 w-48 backdrop-blur-sm rounded-full
+                            focus:outline-none transition-all duration-200
+                            ${isModernTheme
+                                ? 'bg-white/5 border border-white/10 text-white/90 placeholder-white/30 focus:border-white/20'
+                                : 'bg-cyber-surface/60 border border-neon-cyan/30 text-neon-cyan placeholder-neon-cyan/40 focus:border-neon-cyan focus:shadow-[0_0_10px_rgba(0,245,255,0.2)] font-mono'
+                            }
+                            text-sm
+                        `}
+                    />
+                    {searchTerm && (
+                        <button
+                            onClick={() => onSearchChange('')}
+                            className={`absolute right-2 transition-colors ${isModernTheme ? 'text-white/40 hover:text-white' : 'text-neon-cyan/50 hover:text-neon-cyan'}`}
+                        >
+                            <X size={14} />
+                        </button>
+                    )}
+                </div>
+
+                {/* Open Windows */}
                 {openWindows.filter(w => !PINNED_APPS.some(p => p.id === w.id)).map(win => (
                     <button
                         key={win.id}
@@ -143,12 +196,14 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                         onMouseEnter={() => playSound('hover')}
                         className={`
               h-10 px-3 flex items-center gap-2 rounded transition-all
-              hover:bg-neon-cyan/10 text-neon-cyan
-              ${activeWindowId === win.id ? 'bg-neon-cyan/20 border border-neon-cyan/30' : ''}
+              ${isModernTheme
+                                ? `hover:bg-white/10 text-white/80 ${activeWindowId === win.id ? 'bg-white/10 border border-white/10' : ''}`
+                                : `hover:bg-neon-cyan/10 text-neon-cyan ${activeWindowId === win.id ? 'bg-neon-cyan/20 border border-neon-cyan/30' : ''}`
+                            }
             `}
                     >
                         {win.icon}
-                        <span className="text-xs font-mono truncate max-w-[120px]">{win.title}</span>
+                        <span className={`text-xs truncate max-w-[120px] ${isModernTheme ? '' : 'font-mono'}`}>{win.title}</span>
                     </button>
                 ))}
             </div>

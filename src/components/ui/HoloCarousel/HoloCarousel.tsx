@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useSound } from '../../../hooks/useSound';
 
 interface CarouselItem {
@@ -11,12 +11,14 @@ interface CarouselItem {
 interface HoloCarouselProps {
     items: CarouselItem[];
     onLaunch: (id: string) => void;
+    searchTerm?: string;
 }
 
-export const HoloCarousel: React.FC<HoloCarouselProps> = ({ items, onLaunch }) => {
+export const HoloCarousel: React.FC<HoloCarouselProps> = ({ items, onLaunch, searchTerm = '' }) => {
     const { playSound } = useSound();
     const containerRef = useRef<HTMLDivElement>(null);
-    const [searchTerm, setSearchTerm] = useState('');
+
+    const isSearching = searchTerm.length > 0;
 
     // Filter items based on search
     const filteredItems = items.filter(item =>
@@ -32,32 +34,26 @@ export const HoloCarousel: React.FC<HoloCarouselProps> = ({ items, onLaunch }) =
     return (
         <div
             ref={containerRef}
-            className="w-full h-full flex flex-col items-center justify-start pt-8 pb-12 px-12 overflow-y-auto custom-scrollbar"
+            className={`
+                w-full h-full flex flex-col items-center justify-start pt-8 pb-12 px-12 overflow-y-auto custom-scrollbar
+                transition-all duration-500
+                ${isSearching ? 'bg-cyber-bg/60' : ''}
+            `}
         >
-            {/* Search Bar */}
-            <div className="w-[600px] mb-12 relative z-50">
-                <input
-                    type="text"
-                    placeholder="Search apps..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="
-                        w-full px-6 py-4 rounded-full
-                        bg-cyber-surface/40 backdrop-blur-md
-                        border border-white/10
-                        text-white placeholder-white/30 font-cyber tracking-wider
-                        focus:outline-none focus:border-neon-cyan focus:shadow-[0_0_20px_rgba(0,245,255,0.3)]
-                        transition-all duration-300
-                    "
-                    autoFocus
-                />
-                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neon-cyan/50">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
+            {/* Search Mode Header */}
+            {isSearching && (
+                <div className="mb-6 text-center animate-fadeIn">
+                    <div className="text-sm text-neon-cyan/60 font-mono tracking-widest uppercase">
+                        Searching for
+                    </div>
+                    <div className="text-2xl font-cyber text-neon-cyan neon-text mt-1">
+                        "{searchTerm}"
+                    </div>
+                    <div className="text-xs text-neon-magenta/60 mt-2">
+                        {filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''} found
+                    </div>
                 </div>
-            </div>
+            )}
 
             {filteredItems.length === 0 ? (
                 <div className="text-neon-cyan/50 font-cyber text-xl mt-20 animate-pulse">

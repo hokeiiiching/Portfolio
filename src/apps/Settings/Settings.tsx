@@ -34,6 +34,7 @@ export const SettingsApp: React.FC = () => {
                                 onChange={(e) => setTheme(e.target.value as any)}
                                 className="bg-cyber-bg border border-neon-cyan/30 text-neon-cyan text-sm px-3 py-1.5 rounded outline-none focus:border-neon-cyan transition-colors"
                             >
+                                <option value="modern">Modern Clean</option>
                                 <option value="cyberpunk">Cyberpunk Neon</option>
                                 <option value="matrix">Matrix Green</option>
                                 <option value="synthwave">Synthwave</option>

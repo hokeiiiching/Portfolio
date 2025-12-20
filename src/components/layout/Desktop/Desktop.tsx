@@ -67,7 +67,7 @@ const CyberpunkWallpaper = React.memo<{ activeIndex: number }>(({ activeIndex })
         {WALLPAPERS.map((src, index) => (
             <div
                 key={src}
-                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 delay-1000'
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${index === activeIndex ? 'opacity-40 z-10' : 'opacity-0 z-0 delay-1000'
                     }`}
                 style={{ backgroundImage: `url(${src})` }}
             >
@@ -87,6 +87,7 @@ export const Desktop: React.FC = () => {
     const [nextZIndex, setNextZIndex] = useState(10);
     const [bootProgress, setBootProgress] = useState(0);
     const [isBooting, setIsBooting] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { showContextMenu, ContextMenuComponent } = useContextMenu();
     const { playSound } = useSound();
@@ -374,7 +375,7 @@ export const Desktop: React.FC = () => {
 
             {/* Desktop Icons - Holographic Carousel */}
             <div className="flex-1 relative z-10">
-                <HoloCarousel items={DESKTOP_ICONS} onLaunch={openApp} />
+                <HoloCarousel items={DESKTOP_ICONS} onLaunch={openApp} searchTerm={searchTerm} />
             </div>
 
             {/* Windows */}
@@ -406,6 +407,8 @@ export const Desktop: React.FC = () => {
                 activeWindowId={activeWindowId}
                 onWindowClick={focusWindow}
                 onAppClick={openApp}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
             />
 
             {/* Context Menu */}

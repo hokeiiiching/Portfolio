@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface SettingsState {
-    theme: 'cyberpunk' | 'matrix' | 'synthwave';
+    theme: 'modern' | 'cyberpunk' | 'matrix' | 'synthwave';
     soundEnabled: boolean;
     scanlinesEnabled: boolean;
     wallpaperIndex: number;
@@ -17,7 +17,7 @@ interface SettingsContextType extends SettingsState {
 }
 
 const DEFAULT_SETTINGS: SettingsState = {
-    theme: 'cyberpunk',
+    theme: 'modern',
     soundEnabled: true,
     scanlinesEnabled: true,
     wallpaperIndex: 0,

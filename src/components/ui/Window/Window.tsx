@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { X, Minus, Square, Maximize2 } from 'lucide-react';
+import { useSettings } from '../../../contexts/SettingsContext';
 
 interface WindowProps {
     id: string;
@@ -36,6 +37,8 @@ export const Window: React.FC<WindowProps> = ({
     onPositionChange,
     children,
 }) => {
+    const { theme } = useSettings();
+    const isModernTheme = theme === 'modern';
     const windowRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -100,15 +103,115 @@ export const Window: React.FC<WindowProps> = ({
         onFocus(id);
     };
 
-    // Generate random hex data for decoration
+    // Generate random hex data for decoration (only for non-modern themes)
     const hexData = React.useMemo(() => {
         return Array.from({ length: 8 }, () =>
             Math.random().toString(16).substr(2, 4).toUpperCase()
         );
     }, []);
 
-    const cornerSize = 12;
+    const cornerSize = isModernTheme ? 0 : 12;
 
+    // Modern theme: clean, minimal design
+    if (isModernTheme) {
+        return (
+            <div
+                ref={windowRef}
+                className={`
+                    absolute flex flex-col
+                    ${isMinimized ? 'opacity-0 scale-90 pointer-events-none translate-y-10' : 'opacity-100 scale-100'}
+                    ${isMaximized ? '!inset-0 !w-full !h-[calc(100%-56px)]' : ''}
+                `}
+                style={{
+                    zIndex,
+                    left: isMaximized ? 0 : localPos.x,
+                    top: isMaximized ? 0 : localPos.y,
+                    width: isMaximized ? '100%' : size.width,
+                    height: isMaximized ? 'calc(100% - 56px)' : size.height,
+                    transition: isDragging ? 'none' : 'all 0.2s ease-out',
+                    borderRadius: isMaximized ? 0 : 'var(--border-radius, 12px)',
+                }}
+                onMouseDown={() => onFocus(id)}
+            >
+                {/* Modern Window Frame */}
+                <div
+                    className="relative flex flex-col h-full overflow-hidden"
+                    style={{
+                        background: 'rgba(30, 41, 59, 0.95)',
+                        backdropFilter: 'blur(20px)',
+                        border: `1px solid ${isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)'}`,
+                        borderRadius: isMaximized ? 0 : 'var(--border-radius, 12px)',
+                        boxShadow: isActive
+                            ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1)'
+                            : '0 10px 40px -10px rgba(0, 0, 0, 0.4)',
+                    }}
+                >
+                    {/* Clean Header Bar */}
+                    <div
+                        className="relative flex items-center h-11 select-none cursor-default shrink-0 px-4"
+                        style={{
+                            background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                        }}
+                        onMouseDown={handleMouseDown}
+                    >
+                        {/* macOS-style Window Controls - Left */}
+                        <div className="flex items-center gap-2 mr-4">
+                            <button
+                                className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors flex items-center justify-center group"
+                                onClick={(e) => { e.stopPropagation(); onClose(id); }}
+                                aria-label="Close"
+                            >
+                                <X size={8} className="opacity-0 group-hover:opacity-100 text-red-900" strokeWidth={3} />
+                            </button>
+                            <button
+                                className="w-3 h-3 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors flex items-center justify-center group"
+                                onClick={(e) => { e.stopPropagation(); onMinimize(id); }}
+                                aria-label="Minimize"
+                            >
+                                <Minus size={8} className="opacity-0 group-hover:opacity-100 text-yellow-900" strokeWidth={3} />
+                            </button>
+                            <button
+                                className="w-3 h-3 rounded-full bg-green-500/80 hover:bg-green-500 transition-colors flex items-center justify-center group"
+                                onClick={(e) => { e.stopPropagation(); onMaximize(id); }}
+                                aria-label="Maximize"
+                            >
+                                {isMaximized
+                                    ? <Maximize2 size={6} className="opacity-0 group-hover:opacity-100 text-green-900" strokeWidth={3} />
+                                    : <Square size={6} className="opacity-0 group-hover:opacity-100 text-green-900" strokeWidth={3} />
+                                }
+                            </button>
+                        </div>
+
+                        {/* Icon */}
+                        <div
+                            className="flex items-center justify-center w-5 h-5 mr-2"
+                            style={{ color: isActive ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)' }}
+                        >
+                            {icon}
+                        </div>
+
+                        {/* Title - Centered feel */}
+                        <span
+                            className="text-sm font-medium truncate"
+                            style={{ color: isActive ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)' }}
+                        >
+                            {title}
+                        </span>
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="flex-1 relative overflow-hidden" style={{ background: 'var(--color-bg)' }}>
+                        <div className="h-full overflow-auto">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Cyberpunk themes: keep all decorations
     return (
         <div
             ref={windowRef}
