@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ExternalLink, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import React from 'react';
+import { ExternalLink } from 'lucide-react';
 
 interface Project {
     title: string;
@@ -70,16 +70,6 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {project.github && (
-                            <a
-                                href={project.github}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-neon-cyan/50 hover:text-neon-cyan transition-colors"
-                            >
-                                <Github size={16} />
-                            </a>
-                        )}
                         {project.link && (
                             <a
                                 href={project.link}
