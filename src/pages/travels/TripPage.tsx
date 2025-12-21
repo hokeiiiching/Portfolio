@@ -23,7 +23,7 @@ const TRIPS_DATA: Record<string, TripData> = {
         destination: 'Hong Kong',
         location: 'Hong Kong SAR, China',
         date: 'February 2025',
-        coverImage: '/travels/hongkong/cover.png',
+        coverImage: '/travels/hongkong/cover.jpg',
         content: [
             {
                 type: 'text',
@@ -74,12 +74,30 @@ const TRIPS_DATA: Record<string, TripData> = {
             },
             {
                 type: 'image-left',
-                text: 'The sweet finale came in the form of a mango pomelo sago dessert, crowned with a generous scoop of mango ice cream. This iconic Cantonese dessert, with its layers of fresh mango, chewy sago pearls, and creamy pomelo, perfectly encapsulated the trip: layers of experience, each one sweeter than the last.',
+                text: 'The marching band struck up a jaunty tune as I watched their parade down Main Street, the Castle of Magical Dreams rising in the hazy distance. Hong Kong Disneyland may be compact, but it carries a distinct charm—where else can you experience Disney magic with misty mountains as your backdrop? The park felt festive, families laughing, characters waving, a world away from the urban intensity beyond the gates.',
+                image: { src: '/travels/hongkong/gallery-11.png', caption: 'Marching band parade at Hong Kong Disneyland' },
+            },
+            {
+                type: 'image-right',
+                text: 'After a long day at the park, I treated myself to a mango pomelo sago dessert, crowned with a generous scoop of mango ice cream. This iconic Cantonese dessert, with its layers of fresh mango, chewy sago pearls, and creamy pomelo, was the perfect way to cool down before the evening ahead.',
                 image: { src: '/travels/hongkong/gallery-4.jpg', caption: 'Mango pomelo sago dessert' },
             },
             {
+                type: 'image-left',
+                text: 'For a quick dinner before my final adventure, I grabbed a humble takeaway box brimming with char siu, crispy roast pork, and sliced sausage over steaming white rice. Eaten on a park bench as the sun began to set, this simple meal embodied everything I love about this city—no pretense, just perfectly executed flavors honed over generations.',
+                image: { src: '/travels/hongkong/gallery-10.jpg', caption: 'Roast meat rice box from a local cha chaan teng' },
+            },
+            {
+                type: 'full-image',
+                image: { src: '/travels/hongkong/gallery-12.jpg', caption: 'The iconic Hong Kong skyline from Victoria Peak' },
+            },
+            {
                 type: 'text',
-                text: 'Hong Kong has a way of surprising you. It\'s a city where you can hike to dramatic clifftops in the morning, bargain at street markets by evening, and still make time for world-class dim sum. This February journey reminded me why I keep coming back—there\'s always another layer to discover, another story waiting in the next narrow alley or atop the next misty peak.',
+                text: 'On my final evening, I made the pilgrimage to Victoria Peak. As the Peak Tram crawled up the steep incline, the city revealed itself layer by layer. At the summit, I stood in silence, taking in the sprawling urban tapestry—a sea of skyscrapers rising from the harbor, ferries crossing the water like floating lanterns, and beyond it all, the hazy silhouette of Kowloon stretching to the horizon. It\'s a view I\'ve seen countless times in photographs, yet nothing prepares you for the sheer scale of it in person.',
+            },
+            {
+                type: 'text',
+                text: 'Hong Kong has a way of surprising you. It\'s a city where you can hike to dramatic clifftops in the morning, lose yourself in Disneyland by afternoon, and stand atop Victoria Peak watching the city lights flicker to life as evening descends. This February journey reminded me why I keep coming back—there\'s always another layer to discover, another story waiting in the next narrow alley or atop the next misty peak.',
             },
         ],
     },

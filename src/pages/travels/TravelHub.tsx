@@ -17,7 +17,7 @@ const TRIPS: Trip[] = [
         destination: 'Hong Kong',
         location: 'Hong Kong SAR, China',
         date: 'February 2025',
-        coverImage: '/travels/hongkong/cover.png',
+        coverImage: '/travels/hongkong/cover.jpg',
         excerpt: 'Dim sum, roast meats, and the iconic streets of Tsim Sha Tsui—a culinary journey through Asia\'s world city.',
     },
     {
