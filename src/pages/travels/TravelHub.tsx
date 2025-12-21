@@ -137,7 +137,7 @@ const TripCard: React.FC<{ trip: Trip }> = ({ trip }) => {
 
 export const TravelHub: React.FC = () => {
     // First trip is featured, second is secondary, rest go in grid
-    const [featured, secondary, ...remaining] = TRIPS;
+    const [featured, secondary, ..._remaining] = TRIPS;
 
     return (
         <>
