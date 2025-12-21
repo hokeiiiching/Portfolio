@@ -26,7 +26,7 @@ const TRIPS: Trip[] = [
         location: 'New South Wales, Australia',
         date: 'May 2025',
         coverImage: '/travels/sydney/cover.jpg',
-        excerpt: 'From the iconic Opera House to hidden coastal gems.',
+        excerpt: 'Heritage architecture, Italian comfort food, and legendary seafood—exploring Sydney\'s vibrant autumn charm.',
     },
     {
         id: 'chongqing-chengdu',
