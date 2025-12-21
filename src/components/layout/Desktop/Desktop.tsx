@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSound } from '../../../hooks/useSound';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { useKonamiCode } from '../../../hooks/useKonamiCode';
@@ -6,7 +7,7 @@ import { useAchievements } from '../../../contexts/AchievementsContext';
 import {
     FileCode, Mail, User, Terminal, FolderOpen, Settings,
     FileText, Cpu, Gamepad2, Music,
-    RefreshCw, Info, Image, ExternalLink, Plane
+    RefreshCw, Info, Image, ExternalLink
 } from 'lucide-react';
 import { Window } from '../../ui/Window/Window';
 import { Taskbar } from '../Taskbar/Taskbar';
@@ -22,7 +23,6 @@ import { SkillsApp } from '../../../apps/Skills/Skills';
 import { MusicApp } from '../../../apps/Music/Music';
 import { GamesApp } from '../../../apps/Games/Games';
 import { SettingsApp } from '../../../apps/Settings/Settings';
-import { TravelsApp } from '../../../apps/Travels/Travels';
 import {
     // CyberIcons imports removed
 } from '../../ui/CyberIcons/CyberIcons';
@@ -89,6 +89,7 @@ export const Desktop: React.FC = () => {
     const [bootProgress, setBootProgress] = useState(0);
     const [isBooting, setIsBooting] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
 
     const { showContextMenu, ContextMenuComponent } = useContextMenu();
     const { playSound } = useSound();
@@ -100,11 +101,12 @@ export const Desktop: React.FC = () => {
     const { unlockAchievement } = useAchievements();
 
     // Konami Code - God Mode (opens hidden Travel Journal)
+    // Konami Code - God Mode (opens hidden Travel Journal)
     useKonamiCode(() => {
         playSound('success');
         unlockAchievement('konami');
-        // Open the hidden travels app instead of switching theme
-        openApp('travels');
+        // Navigate to the hidden travels page
+        navigate('/travels');
     });
 
     // Unlock "First Boot" on mount
@@ -223,12 +225,6 @@ export const Desktop: React.FC = () => {
                 title = 'arcade.exe';
                 size = { width: 500, height: 500 };
                 icon = <Gamepad2 size={14} />;
-                break;
-            case 'travels':
-                component = <TravelsApp />;
-                title = 'TRAVEL_JOURNAL.exe';
-                size = { width: 900, height: 650 };
-                icon = <Plane size={14} />;
                 break;
             default:
                 return;
