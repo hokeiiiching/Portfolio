@@ -6,7 +6,7 @@ import { useAchievements } from '../../../contexts/AchievementsContext';
 import {
     FileCode, Mail, User, Terminal, FolderOpen, Settings,
     FileText, Cpu, Gamepad2, Music,
-    RefreshCw, Info, Image, ExternalLink
+    RefreshCw, Info, Image, ExternalLink, Plane
 } from 'lucide-react';
 import { Window } from '../../ui/Window/Window';
 import { Taskbar } from '../Taskbar/Taskbar';
@@ -22,6 +22,7 @@ import { SkillsApp } from '../../../apps/Skills/Skills';
 import { MusicApp } from '../../../apps/Music/Music';
 import { GamesApp } from '../../../apps/Games/Games';
 import { SettingsApp } from '../../../apps/Settings/Settings';
+import { TravelsApp } from '../../../apps/Travels/Travels';
 import {
     // CyberIcons imports removed
 } from '../../ui/CyberIcons/CyberIcons';
@@ -94,15 +95,16 @@ export const Desktop: React.FC = () => {
     const {
         wallpaperIndex, setWallpaperIndex,
         bootSkipped, setBootSkipped,
-        scanlinesEnabled, setTheme
+        scanlinesEnabled
     } = useSettings();
     const { unlockAchievement } = useAchievements();
 
-    // Konami Code - God Mode
+    // Konami Code - God Mode (opens hidden Travel Journal)
     useKonamiCode(() => {
         playSound('success');
         unlockAchievement('konami');
-        setTheme('matrix'); // Switch to Matrix theme as "God Mode"
+        // Open the hidden travels app instead of switching theme
+        openApp('travels');
     });
 
     // Unlock "First Boot" on mount
@@ -221,6 +223,12 @@ export const Desktop: React.FC = () => {
                 title = 'arcade.exe';
                 size = { width: 500, height: 500 };
                 icon = <Gamepad2 size={14} />;
+                break;
+            case 'travels':
+                component = <TravelsApp />;
+                title = 'TRAVEL_JOURNAL.exe';
+                size = { width: 900, height: 650 };
+                icon = <Plane size={14} />;
                 break;
             default:
                 return;
