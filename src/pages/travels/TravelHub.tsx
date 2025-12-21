@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Sparkles } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 interface Trip {
     id: string;
@@ -8,6 +8,7 @@ interface Trip {
     location: string;
     date: string;
     coverImage: string;
+    excerpt: string;
 }
 
 const TRIPS: Trip[] = [
@@ -16,7 +17,8 @@ const TRIPS: Trip[] = [
         destination: 'Hong Kong',
         location: 'Hong Kong SAR, China',
         date: 'February 2025',
-        coverImage: '/travels/hongkong/cover.jpg',
+        coverImage: '/travels/hongkong/cover.png',
+        excerpt: 'Dim sum, roast meats, and the iconic streets of Tsim Sha Tsui—a culinary journey through Asia\'s world city.',
     },
     {
         id: 'sydney',
@@ -24,6 +26,7 @@ const TRIPS: Trip[] = [
         location: 'New South Wales, Australia',
         date: 'May 2025',
         coverImage: '/travels/sydney/cover.jpg',
+        excerpt: 'From the iconic Opera House to hidden coastal gems.',
     },
     {
         id: 'chongqing-chengdu',
@@ -31,15 +34,82 @@ const TRIPS: Trip[] = [
         location: 'Sichuan Province, China',
         date: 'December 2025',
         coverImage: '/travels/chongqing-chengdu/cover.jpg',
+        excerpt: 'A journey through China\'s spicy heartland and panda country.',
     },
 ];
 
+// Featured card (large, overlapping hero)
+const FeaturedCard: React.FC<{ trip: Trip }> = ({ trip }) => {
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        const parent = target.parentElement;
+        if (parent) {
+            parent.classList.add('placeholder-image');
+            parent.innerHTML = '<span>Add cover image</span>';
+        }
+    };
+
+    return (
+        <Link to={`/travels/${trip.id}`} className="featured-card">
+            <img
+                src={trip.coverImage}
+                alt={trip.destination}
+                className="featured-card-image"
+                onError={handleImageError}
+            />
+            <div className="featured-card-content">
+                <div className="featured-card-category">Travel</div>
+                <h2 className="featured-card-title">{trip.destination}</h2>
+            </div>
+        </Link>
+    );
+};
+
+// Secondary card (smaller, beside featured)
+const SecondaryCard: React.FC<{ trip: Trip }> = ({ trip }) => {
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        const parent = target.parentElement;
+        if (parent) {
+            parent.classList.add('placeholder-image');
+            parent.innerHTML = '<span>Add cover image</span>';
+        }
+    };
+
+    return (
+        <Link to={`/travels/${trip.id}`} className="secondary-card">
+            <div className="secondary-card-image-container">
+                <img
+                    src={trip.coverImage}
+                    alt={trip.destination}
+                    className="secondary-card-image"
+                    onError={handleImageError}
+                />
+            </div>
+            <div className="secondary-card-content">
+                <div className="secondary-card-category">Travel</div>
+                <h3 className="secondary-card-title">{trip.destination}</h3>
+                <span className="read-link">
+                    <Menu size={14} />
+                    Read
+                </span>
+            </div>
+        </Link>
+    );
+};
+
+// Standard trip card for grid
 const TripCard: React.FC<{ trip: Trip }> = ({ trip }) => {
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
         const target = e.target as HTMLImageElement;
         target.style.display = 'none';
-        target.parentElement!.classList.add('placeholder-image');
-        target.parentElement!.innerHTML = '<span>📷 Add cover image</span>';
+        const parent = target.parentElement;
+        if (parent) {
+            parent.classList.add('placeholder-image');
+            parent.innerHTML = '<span>Add cover image</span>';
+        }
     };
 
     return (
@@ -53,35 +123,54 @@ const TripCard: React.FC<{ trip: Trip }> = ({ trip }) => {
                 />
             </div>
             <div className="trip-card-content">
+                <div className="trip-card-category">Travel</div>
+                <h3 className="trip-card-title">{trip.destination}</h3>
                 <div className="trip-card-date">{trip.date}</div>
-                <h2 className="trip-card-title">{trip.destination}</h2>
-                <div className="trip-card-location">
-                    <MapPin size={14} />
-                    {trip.location}
-                </div>
+                <span className="read-link">
+                    <Menu size={14} />
+                    Read
+                </span>
             </div>
         </Link>
     );
 };
 
 export const TravelHub: React.FC = () => {
+    // First trip is featured, second is secondary, rest go in grid
+    const [featured, secondary, ...remaining] = TRIPS;
+
     return (
         <>
-            {/* Hero Section */}
-            <div className="travel-hero">
-                <div className="secret-badge">
-                    <Sparkles size={14} />
-                    Secret Section Unlocked!
+            {/* Hero Section with dramatic background */}
+            <div
+                className="travel-hero"
+                style={{
+                    backgroundImage: `url(${featured.coverImage})`,
+                    backgroundColor: '#1a1a1a'
+                }}
+            >
+                <div className="travel-hero-content">
+                    <div className="travel-hero-title">
+                        <h1>Travel</h1>
+                    </div>
+                    <p>
+                        Personal journeys and adventures from around the world.
+                        Exploring cultures, landscapes, and the stories that connect us.
+                    </p>
                 </div>
-                <h1>My Travel Journal</h1>
-                <p>
-                    A collection of my adventures around the world.
-                    You discovered this hidden section by entering the Konami Code!
-                </p>
             </div>
 
-            {/* Trips Grid */}
+            {/* Featured Section - Overlapping hero */}
+            <div className="featured-section">
+                <FeaturedCard trip={featured} />
+                {secondary && <SecondaryCard trip={secondary} />}
+            </div>
+
+            {/* All Trips Grid */}
             <div className="travel-container">
+                <div className="section-header">
+                    <h2>All Journeys</h2>
+                </div>
                 <div className="trips-grid">
                     {TRIPS.map((trip) => (
                         <TripCard key={trip.id} trip={trip} />

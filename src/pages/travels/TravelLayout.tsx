@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import './travels.css';
 
 export const TravelLayout: React.FC = () => {
@@ -9,29 +9,29 @@ export const TravelLayout: React.FC = () => {
 
     return (
         <div className="travel-page">
-            {/* Navigation */}
+            {/* Minimal Navigation */}
             <nav className="travel-nav">
                 <div className="travel-nav-content">
                     <Link to="/travels" className="travel-nav-title">
-                        My Travels
+                        Travel
                     </Link>
                     <Link to="/" className="travel-nav-back">
-                        <Home size={16} />
-                        Back to Portfolio
+                        <ArrowLeft size={14} />
+                        Portfolio
                     </Link>
                 </div>
             </nav>
 
-            {/* Show breadcrumb on trip detail pages */}
+            {/* Breadcrumb on detail pages */}
             {!isHub && (
-                <div className="travel-container" style={{ paddingBottom: 0 }}>
+                <div className="travel-container" style={{ paddingBottom: 0, paddingTop: '1rem' }}>
                     <Link
                         to="/travels"
                         className="travel-nav-back"
-                        style={{ display: 'inline-flex', marginBottom: '1rem' }}
+                        style={{ display: 'inline-flex' }}
                     >
-                        <ArrowLeft size={16} />
-                        All Trips
+                        <ArrowLeft size={14} />
+                        All Journeys
                     </Link>
                 </div>
             )}
@@ -39,9 +39,9 @@ export const TravelLayout: React.FC = () => {
             {/* Page Content */}
             <Outlet />
 
-            {/* Footer */}
+            {/* Minimal Footer */}
             <footer className="travel-footer">
-                <p>✈️ Secret travel journal discovered via Konami Code</p>
+                <p>© {new Date().getFullYear()} · Personal Travel Journal</p>
             </footer>
         </div>
     );
